@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SpotifyStreamer</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="artist_search">Search</string>
+    <string name="search_hint">Type the name of an artist...</string>
+    <string name="search_activity">Artist Search</string>
+    <string name="action_settings">Settings</string>
+</resources>
