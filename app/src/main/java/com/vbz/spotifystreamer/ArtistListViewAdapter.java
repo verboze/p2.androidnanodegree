@@ -10,10 +10,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
-public class ArtistListViewAdapter extends ArrayAdapter<ArtistListViewItem> {
+import kaaes.spotify.webapi.android.models.Artist;
 
-    public ArtistListViewAdapter(Context context, List<ArtistListViewItem> items) {
+/* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
+public class ArtistListViewAdapter extends ArrayAdapter<Artist> {
+
+    public ArtistListViewAdapter(Context context, List<Artist> items) {
         super(context, R.layout.listview_artist_item, items);
     }
 
@@ -36,8 +38,8 @@ public class ArtistListViewAdapter extends ArrayAdapter<ArtistListViewItem> {
         }
 
         // update the item view
-        ArtistListViewItem item = getItem(position);
-        viewHolder.ivCover.setImageDrawable(item.cover);
+        Artist item = getItem(position);
+//        viewHolder.ivCover.setImageDrawable(item.cover);
         viewHolder.tvName.setText(item.name);
 
         return convertView;

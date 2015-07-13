@@ -12,19 +12,42 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 public class TrackViewFragment extends ListFragment {
-    private static final String LOG_TAG = "SPOTSTREAMER";
+    private static final String LOG_TAG_APP = "SPOTSTREAMER";
+    private static final String LOG_TAG_API = "SPOTAPI";
     private List<TrackListViewItem> datalist; // holds data retrieved from API
+    private SpotifyService spotifysvc = new SpotifyApi().getService();
 
     public TrackViewFragment() {
 
     }
 
-    private List<String[]> fetchTracks(String query) {
+    private List<String[]> fetchTracks(String artistid) {
         // TODO: retrieve data from network using spotify API
-        Toast.makeText(getActivity(), "looking up tracks for " + query + "...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "looking up tracks for " + artistid + "...", Toast.LENGTH_SHORT).show();
+        HashMap<String, Object> country = new HashMap<String, Object>();
+        country.put("country", "us");
+        spotifysvc.getArtistTopTrack(artistid, country, new Callback<Tracks>() {
+            @Override public void success(Tracks tracks, Response response) {
+                Log.d(LOG_TAG_API, "found tracks: " + tracks.tracks);
+            }
+
+            @Override public void failure(RetrofitError error) {
+                Log.e(LOG_TAG_API, "failed to retrieve artist top tracks:\n" + error.toString());
+                Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // dummy data ++++++++++++++++++++++++++++++++++++++++++++++++
         ArrayList<String[]> found = new ArrayList<String[]>();
         int itemcount = 3;
@@ -32,9 +55,8 @@ public class TrackViewFragment extends ListFragment {
             String[] m = {"key"+i, "val"+i};
             found.add(m);
         }
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
         return found;
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 
     public void setListdata(List<String[]> data) {
@@ -50,7 +72,7 @@ public class TrackViewFragment extends ListFragment {
         } else {
             // toast no data found
             setEmptyText("no data found...");
-            Log.d(LOG_TAG, "no data found");
+            Log.d(LOG_TAG_APP, "no data found");
         }
     }
 

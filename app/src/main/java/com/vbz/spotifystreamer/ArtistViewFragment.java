@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,84 +29,53 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 public class ArtistViewFragment extends ListFragment {
-    private static final String LOG_TAG = "SPOTSTREAMER";
-    private List<ArtistListViewItem> datalist; // holds data retrieved from API
-    private SpotifyApi spotApi = new SpotifyApi();
+    private static final String LOG_TAG_APP = "SPOTSTREAMER";
+    private static final String LOG_TAG_API = "SPOTAPI";
+    private List<Artist> datalist; // holds data retrieved from API
+    private SpotifyService spotifysvc = new SpotifyApi().getService();
 
     public ArtistViewFragment() {
 
     }
 
-    // DUMMY TEST DATA
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    private final String[] data = {"adama", "elisabeth", "kate", "kerri", "nanako"};
-    private final String[] pics = new String[] { "http://www.smashingmagazine.com/images/music-cd-covers/67.jpg",
-                                                 "http://www.smashingmagazine.com/images/music-cd-covers/64.jpg",
-                                                 "http://www.smashingmagazine.com/images/music-cd-covers/michael_jackson_dangerous-f.jpg",
-                                                 "http://www.smashingmagazine.com/images/music-cd-covers/43.jpg",
-                                                 "http://www.smashingmagazine.com/images/music-cd-covers/zeitgeist.jpg" };
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    private List<String[]> search(String query) {
-        // TODO: retrieve data from network using spotify API
+    private void search(String query) {
+        // TODO: make it a bit more user friendly, show spinners while loading, etc
         final List<Artist> foundartists = new ArrayList<Artist>();
+        final String usrquery = query;
 
-        SpotifyService spotify = spotApi.getService();
-        spotify.searchArtists(query, new Callback<ArtistsPager>() {
+        spotifysvc.searchArtists(query, new Callback<ArtistsPager>() {
             @Override public void success(ArtistsPager artists, Response response) {
                 List<Artist> artistlist = artists.artists.items;
-                Log.d("SPOTAPI", "found artists [" + artistlist.size() + "]: " + artistlist.toString());
-                for (Artist i : artists.artists.items) {
-                    foundartists.add(i);
+                Log.d(LOG_TAG_API, "found artists [" + artistlist.size() + "]: " + artistlist.toString());
+                datalist.clear();
+
+                if (artistlist.size() > 0) {
+                    setListdata(artistlist);
+                } else {
+                    Toast.makeText(getActivity(), "no artists found by the name: " + usrquery , Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d("Album failure", error.toString());
+            @Override public void failure(RetrofitError error) {
+                Log.e(LOG_TAG_API, "failed to retrieve artists:\n" + error.toString());
+                Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
             }
         });
-        // --------------------------------------------------------
-        Log.d(LOG_TAG, "search called");
-        List<String[]> found = new ArrayList<String[]>();
-
-        if (! TextUtils.isEmpty(query)) {
-            // TODO: get real data from spotify wrapper here
-            for (String s : data) {
-                if (s.contains(query)) {
-                    String[] a = {"1", s};
-                    found.add(a);
-                }
-            }
-        }
-
-        return found;
     }
 
-    public void setListdata(List<String[]> data) {
-        datalist.clear();
+    public void setListdata(List<Artist> data) {
         Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
-
-        if (data.size() > 0) {
-            Log.d(LOG_TAG, "data found: " + data.toString());
-            for (String[] i : data) {
-                datalist.add(new ArtistListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), i[1]));
-            }
-            setListAdapter(new ArtistListViewAdapter(getActivity(), datalist));
-//            setListShown(true);
-        } else {
-            // toast no data found
-//            setListShown(false);
-//            setEmptyText("no data found...");
-            Log.d(LOG_TAG, "no data found");
-//            Toast.makeText(getActivity(), "no data found for [" + query + "]", Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG_APP, "data found: " + data.toString());
+        for (Artist i : data) {
+            datalist.add(i);
         }
+        setListAdapter(new ArtistListViewAdapter(getActivity(), datalist));
     }
 
     @Override public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
         setHasOptionsMenu(true);
         setRetainInstance(true);
-        datalist = new ArrayList<ArtistListViewItem>();
+        datalist = new ArrayList<Artist>();
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -129,16 +97,15 @@ public class ArtistViewFragment extends ListFragment {
         sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(LOG_TAG, "submitting query: " + query);
-                List<String[]> data = search(query);
-                setListdata(data);
+                Log.d(LOG_TAG_APP, "submitting query: " + query);
+                search(query);
                 sv.onActionViewCollapsed(); // collapses searchbar and hides keyboard
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.d(LOG_TAG, "listening for... " + newText);
+                Log.d(LOG_TAG_APP, "listening for... " + newText);
                 return true;
             }
         });
@@ -155,10 +122,10 @@ public class ArtistViewFragment extends ListFragment {
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO: display popular tracks for artist
-        ArtistListViewItem item = datalist.get(position);
+        Artist item = datalist.get(position);
 
         Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);
-        detailsIntent.putExtra("artist", item.name);
+        detailsIntent.putExtra("artist", item.id);
         if (detailsIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(detailsIntent);
         }
@@ -166,4 +133,14 @@ public class ArtistViewFragment extends ListFragment {
             Toast.makeText(getActivity(), "could not find TackActivity", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /*
+    @Override public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+    */
 }
