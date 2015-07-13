@@ -48,7 +48,5 @@ public class MainActivity extends AppCompatActivity {
 }
 
 // TODO: NICE TO HAVES:
-//       restore view when back button is pressed
-//       display search message on empty listview
 //       display message in listview on no data found
 //       show loader when data is being fetched

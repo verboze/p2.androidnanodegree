@@ -1,7 +1,6 @@
 package com.vbz.spotifystreamer;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -42,6 +41,11 @@ public class TrackViewFragment extends ListFragment {
             @Override public void success(Tracks tracks, Response response) {
                 Log.d(LOG_TAG_API, "found tracks: " + tracks.tracks);
                 setListdata(tracks.tracks);
+                if (tracks.tracks.size() > 0) {
+                    setListdata(tracks.tracks);
+                } else {
+                    Toast.makeText(getActivity(), "no top tracks found for artist ", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override public void failure(RetrofitError error) {
@@ -53,17 +57,13 @@ public class TrackViewFragment extends ListFragment {
 
     public void setListdata(List<Track> data) {
         datalist.clear();
-        Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
 
         if (data.size() > 0) {
-
             for (Track i : data) {
                 datalist.add(i);
             }
             setListAdapter(new TrackListViewAdapter(getActivity(), datalist));
         } else {
-            // toast no data found
-            setEmptyText("no data found...");
             Log.d(LOG_TAG_APP, "no data found");
         }
     }
@@ -76,9 +76,8 @@ public class TrackViewFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        View v = inflater.inflate(R.layout.fragment_tracks, container, false);
         Intent intent = getActivity().getIntent();
-
         String artist = intent.getStringExtra("artist");
         fetchTracks(artist);
         return v;
