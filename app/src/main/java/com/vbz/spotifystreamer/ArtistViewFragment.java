@@ -2,7 +2,6 @@ package com.vbz.spotifystreamer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -63,7 +62,6 @@ public class ArtistViewFragment extends ListFragment {
     }
 
     public void setListdata(List<Artist> data) {
-        Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
         Log.d(LOG_TAG_APP, "data found: " + data.toString());
         for (Artist i : data) {
             datalist.add(i);

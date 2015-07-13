@@ -17,6 +17,7 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -25,21 +26,22 @@ import retrofit.client.Response;
 public class TrackViewFragment extends ListFragment {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
-    private List<TrackListViewItem> datalist; // holds data retrieved from API
+    private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
 
     public TrackViewFragment() {
 
     }
 
-    private List<String[]> fetchTracks(String artistid) {
+    private void fetchTracks(String artistid) {
         // TODO: retrieve data from network using spotify API
-        Toast.makeText(getActivity(), "looking up tracks for " + artistid + "...", Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG_APP, "looking up tracks for " + artistid + "...");
         HashMap<String, Object> country = new HashMap<String, Object>();
         country.put("country", "us");
         spotifysvc.getArtistTopTrack(artistid, country, new Callback<Tracks>() {
             @Override public void success(Tracks tracks, Response response) {
                 Log.d(LOG_TAG_API, "found tracks: " + tracks.tracks);
+                setListdata(tracks.tracks);
             }
 
             @Override public void failure(RetrofitError error) {
@@ -55,18 +57,17 @@ public class TrackViewFragment extends ListFragment {
             String[] m = {"key"+i, "val"+i};
             found.add(m);
         }
-        return found;
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 
-    public void setListdata(List<String[]> data) {
+    public void setListdata(List<Track> data) {
         datalist.clear();
         Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
 
         if (data.size() > 0) {
 
-            for (String[] i : data) {
-                datalist.add(new TrackListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), i[0], i[1]));
+            for (Track i : data) {
+                datalist.add(i);
             }
             setListAdapter(new TrackListViewAdapter(getActivity(), datalist));
         } else {
@@ -78,19 +79,16 @@ public class TrackViewFragment extends ListFragment {
 
     @Override public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
-//        setRetainInstance(true);
-        datalist = new ArrayList<TrackListViewItem>();
+        datalist = new ArrayList<>();
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        // set array adapter with empty data
         View v =  inflater.inflate(R.layout.fragment_main, container, false);
         Intent intent = getActivity().getIntent();
 
         String artist = intent.getStringExtra("artist");
-        List<String[]> tracks = fetchTracks(artist);
-        setListdata(tracks);
+        fetchTracks(artist);
         return v;
     }
 
@@ -100,7 +98,7 @@ public class TrackViewFragment extends ListFragment {
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO: display popular tracks for artist
-        TrackListViewItem item = datalist.get(position);
-        Toast.makeText(getActivity(), "Item clicked: " + item.album, Toast.LENGTH_SHORT).show();
+        Track item = datalist.get(position);
+        Toast.makeText(getActivity(), "Item clicked: " + item.name, Toast.LENGTH_SHORT).show();
     }
 }

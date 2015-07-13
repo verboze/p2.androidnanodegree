@@ -24,14 +24,13 @@
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="album"
+            android:textStyle="bold"
             android:paddingLeft="6dp"/>
         <TextView
             android:id="@+id/list_item_track"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="track 1: some stuff goes here"
             android:paddingLeft="6dp"/>
     </LinearLayout>
 </LinearLayout>

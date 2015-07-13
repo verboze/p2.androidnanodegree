@@ -8,12 +8,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
 
 /* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
 public class ArtistListViewAdapter extends ArrayAdapter<Artist> {
+    private static final String emptyartisturl = "https://pbs.twimg.com/profile_images/2481881216/i29qdpcln2fiakaoii4p_400x400.gif";
 
     public ArtistListViewAdapter(Context context, List<Artist> items) {
         super(context, R.layout.listview_artist_item, items);
@@ -39,8 +42,18 @@ public class ArtistListViewAdapter extends ArrayAdapter<Artist> {
 
         // update the item view
         Artist item = getItem(position);
-//        viewHolder.ivCover.setImageDrawable(item.cover);
         viewHolder.tvName.setText(item.name);
+        if (item.images.size() > 0) {
+            Picasso.with(getContext())
+                    .load(item.images.get(0).url)
+                    .resize(250, 250)
+                    .into(viewHolder.ivCover);
+        } else {
+            Picasso.with(getContext())
+                    .load(emptyartisturl)
+                    .resize(250, 250)
+                    .into(viewHolder.ivCover);
+        }
 
         return convertView;
     }

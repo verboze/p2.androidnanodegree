@@ -8,12 +8,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
-/* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
-public class TrackListViewAdapter extends ArrayAdapter<TrackListViewItem> {
+import kaaes.spotify.webapi.android.models.Track;
 
-    public TrackListViewAdapter(Context context, List<TrackListViewItem> items) {
+/* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
+public class TrackListViewAdapter extends ArrayAdapter<Track> {
+    private static final String emptycoverurl = "http://static.tumblr.com/jn9hrij/20Ul2zzsr/albumart.jpg";
+
+    public TrackListViewAdapter(Context context, List<Track> items) {
         super(context, R.layout.listview_track_item, items);
     }
 
@@ -37,10 +42,23 @@ public class TrackListViewAdapter extends ArrayAdapter<TrackListViewItem> {
         }
 
         // update the item view
-        TrackListViewItem item = getItem(position);
-        viewHolder.ivCover.setImageDrawable(item.cover);
-        viewHolder.tvAlbum.setText(item.album);
-        viewHolder.tvTrack.setText(item.track);
+        Track item = getItem(position);
+//        viewHolder.ivCover.setImageDrawable(item.cover);
+        viewHolder.tvAlbum.setText(item.album.name);
+        viewHolder.tvTrack.setText(item.name);
+
+        if (item.album.images.size() > 0) {
+            Picasso.with(getContext())
+                    .load(item.album.images.get(0).url)
+                    .resize(250, 250)
+                    .into(viewHolder.ivCover);
+        } else {
+            Picasso.with(getContext())
+                    .load(emptycoverurl)
+                    .resize(250, 250)
+                    .into(viewHolder.ivCover);
+        }
+
 
         return convertView;
     }
