@@ -21,10 +21,22 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ArtistViewFragment extends ListFragment {
-    private List<ArtistListViewItem> datalist; // holds data retrieved from API
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
-    public ArtistViewFragment() { }
+public class ArtistViewFragment extends ListFragment {
+    private static final String LOG_TAG = "SPOTSTREAMER";
+    private List<ArtistListViewItem> datalist; // holds data retrieved from API
+    private SpotifyApi spotApi = new SpotifyApi();
+
+    public ArtistViewFragment() {
+
+    }
 
     // DUMMY TEST DATA
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -34,19 +46,36 @@ public class ArtistViewFragment extends ListFragment {
                                                  "http://www.smashingmagazine.com/images/music-cd-covers/michael_jackson_dangerous-f.jpg",
                                                  "http://www.smashingmagazine.com/images/music-cd-covers/43.jpg",
                                                  "http://www.smashingmagazine.com/images/music-cd-covers/zeitgeist.jpg" };
-    private static final String LOG_TAG = "SPOTSTREAMER";
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    private List<String> search(String query) {
+    private List<String[]> search(String query) {
         // TODO: retrieve data from network using spotify API
+        final List<Artist> foundartists = new ArrayList<Artist>();
+
+        SpotifyService spotify = spotApi.getService();
+        spotify.searchArtists(query, new Callback<ArtistsPager>() {
+            @Override public void success(ArtistsPager artists, Response response) {
+                List<Artist> artistlist = artists.artists.items;
+                Log.d("SPOTAPI", "found artists [" + artistlist.size() + "]: " + artistlist.toString());
+                for (Artist i : artists.artists.items) {
+                    foundartists.add(i);
+                }
+            }
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("Album failure", error.toString());
+            }
+        });
+        // --------------------------------------------------------
         Log.d(LOG_TAG, "search called");
-        List<String> found = new ArrayList<String>();
+        List<String[]> found = new ArrayList<String[]>();
 
         if (! TextUtils.isEmpty(query)) {
             // TODO: get real data from spotify wrapper here
             for (String s : data) {
                 if (s.contains(query)) {
-                    found.add(s);
+                    String[] a = {"1", s};
+                    found.add(a);
                 }
             }
         }
@@ -54,14 +83,14 @@ public class ArtistViewFragment extends ListFragment {
         return found;
     }
 
-    public void setListdata(List<String> data) {
+    public void setListdata(List<String[]> data) {
         datalist.clear();
         Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
 
         if (data.size() > 0) {
             Log.d(LOG_TAG, "data found: " + data.toString());
-            for (String i : data) {
-                datalist.add(new ArtistListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), i));
+            for (String[] i : data) {
+                datalist.add(new ArtistListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), i[1]));
             }
             setListAdapter(new ArtistListViewAdapter(getActivity(), datalist));
 //            setListShown(true);
@@ -88,19 +117,27 @@ public class ArtistViewFragment extends ListFragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // let the fragment resolve searches
+        // add a search icon to action bar
+        inflater.inflate(R.menu.menu_mainfragment, menu);
+        final MenuItem searchButton = menu.findItem(R.id.search);
+        searchButton.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        // bind processing of searchview results to this fragment
         // we get the theme for this activity so that text is rendered properly
         Context themectx = ((AppCompatActivity) getActivity()).getSupportActionBar().getThemedContext();
-        SearchView sv = new SearchView(themectx);
+        final SearchView sv = new SearchView(themectx);
         sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override public boolean onQueryTextSubmit(String query) {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
                 Log.d(LOG_TAG, "submitting query: " + query);
-                List<String> data = search(query);
+                List<String[]> data = search(query);
                 setListdata(data);
+                sv.onActionViewCollapsed(); // collapses searchbar and hides keyboard
                 return true;
             }
 
-            @Override public boolean onQueryTextChange(String newText) {
+            @Override
+            public boolean onQueryTextChange(String newText) {
                 Log.d(LOG_TAG, "listening for... " + newText);
                 return true;
             }
@@ -109,11 +146,7 @@ public class ArtistViewFragment extends ListFragment {
         sv.setOnCloseListener(null);
         sv.setIconifiedByDefault(true);
 
-        // add a search icon to action bar
-        inflater.inflate(R.menu.menu_mainfragment, menu);
-        MenuItem searchview = menu.findItem(R.id.search);
-        searchview.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        searchview.setActionView(sv);
+        searchButton.setActionView(sv);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -123,15 +156,14 @@ public class ArtistViewFragment extends ListFragment {
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO: display popular tracks for artist
         ArtistListViewItem item = datalist.get(position);
-        Toast.makeText(getActivity(), "Item clicked: " + item.name, Toast.LENGTH_SHORT).show();
 
         Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);
-        detailsIntent.putExtra("tracks", 3);
+        detailsIntent.putExtra("artist", item.name);
         if (detailsIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(detailsIntent);
         }
         else {
-            Toast.makeText(getActivity(), "could not find Detail Activity", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "could not find TackActivity", Toast.LENGTH_SHORT).show();
         }
     }
 }
