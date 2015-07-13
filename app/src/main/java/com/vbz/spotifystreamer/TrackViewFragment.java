@@ -49,15 +49,6 @@ public class TrackViewFragment extends ListFragment {
                 Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // dummy data ++++++++++++++++++++++++++++++++++++++++++++++++
-        ArrayList<String[]> found = new ArrayList<String[]>();
-        int itemcount = 3;
-        for (int i=0; i < itemcount; i++) {
-            String[] m = {"key"+i, "val"+i};
-            found.add(m);
-        }
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 
     public void setListdata(List<Track> data) {
@@ -82,9 +73,10 @@ public class TrackViewFragment extends ListFragment {
         datalist = new ArrayList<>();
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
-        View v =  inflater.inflate(R.layout.fragment_main, container, false);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
         Intent intent = getActivity().getIntent();
 
         String artist = intent.getStringExtra("artist");

@@ -43,7 +43,8 @@ public class ArtistViewFragment extends ListFragment {
         final String usrquery = query;
 
         spotifysvc.searchArtists(query, new Callback<ArtistsPager>() {
-            @Override public void success(ArtistsPager artists, Response response) {
+            @Override
+            public void success(ArtistsPager artists, Response response) {
                 List<Artist> artistlist = artists.artists.items;
                 Log.d(LOG_TAG_API, "found artists [" + artistlist.size() + "]: " + artistlist.toString());
                 datalist.clear();
@@ -51,10 +52,12 @@ public class ArtistViewFragment extends ListFragment {
                 if (artistlist.size() > 0) {
                     setListdata(artistlist);
                 } else {
-                    Toast.makeText(getActivity(), "no artists found by the name: " + usrquery , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "no artists found by the name: " + usrquery, Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override public void failure(RetrofitError error) {
+
+            @Override
+            public void failure(RetrofitError error) {
                 Log.e(LOG_TAG_API, "failed to retrieve artists:\n" + error.toString());
                 Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
             }
@@ -73,7 +76,12 @@ public class ArtistViewFragment extends ListFragment {
         super.onCreate(savedinstanceSate);
         setHasOptionsMenu(true);
         setRetainInstance(true);
-        datalist = new ArrayList<Artist>();
+        if (savedinstanceSate != null) {
+            // restore layout
+            Log.d(LOG_TAG_APP, "restoring instance...?");
+        } else {
+            datalist = new ArrayList<Artist>();
+        }
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -132,13 +140,8 @@ public class ArtistViewFragment extends ListFragment {
         }
     }
 
-    /*
     @Override public void onSaveInstanceState(Bundle savedInstanceState) {
+//        savedInstanceState.put
         super.onSaveInstanceState(savedInstanceState);
     }
-
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-    */
 }

@@ -6,9 +6,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String ARTIST_FRAGMENT = "artist_fragment";
+    private ArtistViewFragment artistfrag;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
+        FragmentManager fm = getSupportFragmentManager();
+        artistfrag = (ArtistViewFragment) fm.findFragmentByTag(ARTIST_FRAGMENT);
+        if (artistfrag == null) {
+            artistfrag = new ArtistViewFragment();
+            fm.beginTransaction().add(R.id.maincontainer, artistfrag).commit();
+        }
+        */
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.maincontainer, new ArtistViewFragment())
