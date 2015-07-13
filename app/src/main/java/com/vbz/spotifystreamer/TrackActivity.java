@@ -2,21 +2,19 @@ package com.vbz.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class TrackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
-            Log.d("SPOTSTREAMER", "creating new view");
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.maincontainer, new ArtistViewFragment())
+                    .add(R.id.maincontainer, new TrackViewFragment())
                     .commit();
         }
-        setContentView(R.layout.activity_main);
     }
 
     @Override

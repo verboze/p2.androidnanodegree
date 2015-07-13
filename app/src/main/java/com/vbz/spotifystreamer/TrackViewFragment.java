@@ -20,12 +20,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivityFragment extends ListFragment {
-    private List<ListViewItem> datalist; // holds data retrieved from API
+public class TrackViewFragment extends ListFragment {
+    private List<TrackListViewItem> datalist; // holds data retrieved from API
+
+    public TrackViewFragment() { }
 
     // DUMMY TEST DATA
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    private final String[] data = {"adama", "elisabeth", "kate", "kerri", "nanako"};
+    private final String[] data = {"1", "2", "3", "4", "5"};
+    private final String[] data2 = {"a", "b", "c", "d", "e"};
     private final String[] pics = new String[] { "http://www.smashingmagazine.com/images/music-cd-covers/67.jpg",
                                                  "http://www.smashingmagazine.com/images/music-cd-covers/64.jpg",
                                                  "http://www.smashingmagazine.com/images/music-cd-covers/michael_jackson_dangerous-f.jpg",
@@ -34,45 +37,48 @@ public class MainActivityFragment extends ListFragment {
     private static final String LOG_TAG = "SPOTSTREAMER";
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    private void search(String query) {
+    private List<String> search(String query) {
         // TODO: retrieve data from network using spotify API
-        Log.d(LOG_TAG, "(fragment) searched called");
-        datalist.clear();
-        Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
+        Log.d(LOG_TAG, "search called");
+        List<String> found = new ArrayList<String>();
 
         if (! TextUtils.isEmpty(query)) {
             // TODO: get real data from spotify wrapper here
-            List<String> found = new ArrayList<String>();
             for (String s : data) {
                 if (s.contains(query)) {
                     found.add(s);
                 }
             }
-
-            if (found.size() > 0) {
-                Log.d(LOG_TAG, "(fragment) data found: " + found.toString());
-                Toast.makeText(getActivity(), " fragment) data found: " + found.toString(), Toast.LENGTH_SHORT).show();
-                for (String i : found) {
-                    datalist.add(new ListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), i));
-                }
-                setListAdapter(new ListViewAdapter(getActivity(), datalist));
-            } else {
-                // toast no data found
-                Log.d(LOG_TAG, "(fragment) no data found");
-                Toast.makeText(getActivity(), "(fragment) no data found for [" + query + "]", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Log.d(LOG_TAG, "(fragment) empty search query");
         }
+
+        return found;
     }
 
-    public MainActivityFragment() {
+    public void setListdata(List<String> dat) {
+        datalist.clear();
+        Resources resresolver = getResources(); // KDADEBUG: used to temp resolve local images
+
+        if (dat.size() > 0) {
+            Log.d(LOG_TAG, "data found: " + dat.toString());
+            for (int i=0; i < dat.size(); i++) {
+                datalist.add(new TrackListViewItem(resresolver.getDrawable(R.drawable.ic_launcher), data[i], data2[i]));
+            }
+            setListAdapter(new TrackListViewAdapter(getActivity(), datalist));
+//            setListShown(true);
+        } else {
+            // toast no data found
+//            setListShown(false);
+            setEmptyText("no data found...");
+            Log.d(LOG_TAG, "no data found");
+//            Toast.makeText(getActivity(), "no data found for [" + query + "]", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
         setHasOptionsMenu(true);
-        datalist = new ArrayList<ListViewItem>();
+        setRetainInstance(true);
+        datalist = new ArrayList<TrackListViewItem>();
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -89,7 +95,8 @@ public class MainActivityFragment extends ListFragment {
         sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override public boolean onQueryTextSubmit(String query) {
                 Log.d(LOG_TAG, "submitting query: " + query);
-                search(query);
+                List<String> data = search(query);
+                setListdata(data);
                 return true;
             }
 
@@ -115,7 +122,7 @@ public class MainActivityFragment extends ListFragment {
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO: display popular tracks for artist
-        ListViewItem item = datalist.get(position);
-        Toast.makeText(getActivity(), "Item clicked: " + item.name, Toast.LENGTH_SHORT).show();
+        TrackListViewItem item = datalist.get(position);
+        Toast.makeText(getActivity(), "Item clicked: " + item.album, Toast.LENGTH_SHORT).show();
     }
 }

@@ -11,10 +11,10 @@ import android.widget.TextView;
 import java.util.List;
 
 /* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
-public class ListViewAdapter extends ArrayAdapter<ListViewItem> {
+public class ArtistListViewAdapter extends ArrayAdapter<ArtistListViewItem> {
 
-    public ListViewAdapter(Context context, List<ListViewItem> items) {
-        super(context, R.layout.listview_item, items);
+    public ArtistListViewAdapter(Context context, List<ArtistListViewItem> items) {
+        super(context, R.layout.listview_artist_item, items);
     }
 
     @Override public View getView(int position, View convertView, ViewGroup parent) {
@@ -23,7 +23,7 @@ public class ListViewAdapter extends ArrayAdapter<ListViewItem> {
         if(convertView == null) {
             // inflate the GridView item layout
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.listview_item, parent, false);
+            convertView = inflater.inflate(R.layout.listview_artist_item, parent, false);
 
             // initialize the view holder
             viewHolder = new ViewHolder();
@@ -36,7 +36,7 @@ public class ListViewAdapter extends ArrayAdapter<ListViewItem> {
         }
 
         // update the item view
-        ListViewItem item = getItem(position);
+        ArtistListViewItem item = getItem(position);
         viewHolder.ivCover.setImageDrawable(item.cover);
         viewHolder.tvName.setText(item.name);
 
