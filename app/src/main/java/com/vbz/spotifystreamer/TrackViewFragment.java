@@ -27,6 +27,7 @@ public class TrackViewFragment extends ListFragment {
     private static final String LOG_TAG_API = "SPOTAPI";
     private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
+    private boolean was_data_fetched = false;
 
     public TrackViewFragment() {
 
@@ -38,7 +39,8 @@ public class TrackViewFragment extends ListFragment {
         HashMap<String, Object> country = new HashMap<String, Object>();
         country.put("country", "us");
         spotifysvc.getArtistTopTrack(artistid, country, new Callback<Tracks>() {
-            @Override public void success(Tracks tracks, Response response) {
+            @Override
+            public void success(Tracks tracks, Response response) {
                 Log.d(LOG_TAG_API, "found tracks: " + tracks.tracks);
                 setListdata(tracks.tracks);
                 if (tracks.tracks.size() > 0) {
@@ -48,7 +50,8 @@ public class TrackViewFragment extends ListFragment {
                 }
             }
 
-            @Override public void failure(RetrofitError error) {
+            @Override
+            public void failure(RetrofitError error) {
                 Log.e(LOG_TAG_API, "failed to retrieve artist top tracks:\n" + error.toString());
                 Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
             }
@@ -70,16 +73,25 @@ public class TrackViewFragment extends ListFragment {
 
     @Override public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
-        datalist = new ArrayList<>();
+        setRetainInstance(true);
+        if (savedinstanceSate != null) {
+            // restore layout
+            Log.d(LOG_TAG_APP, "restoring instance...?");
+        } else {
+            datalist = new ArrayList<>();
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_tracks, container, false);
-        Intent intent = getActivity().getIntent();
-        String artist = intent.getStringExtra("artist");
-        fetchTracks(artist);
+        if (!was_data_fetched) {
+            Intent intent = getActivity().getIntent();
+            String artist = intent.getStringExtra("artist");
+            fetchTracks(artist);
+            was_data_fetched = true;
+        }
         return v;
     }
 
