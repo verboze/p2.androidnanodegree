@@ -30,15 +30,9 @@ public class TrackActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.action_settings:
-                return true;
-        }
-
-//        int id = item.getItemId();
-//        if (id == R.id.action_settings) {
+//            case R.id.action_settings:
 //            return true;
-//        }
-
+        }
         return super.onOptionsItemSelected(item);
     }
 }

@@ -3,6 +3,8 @@ package com.vbz.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +55,7 @@ public class TrackViewFragment extends ListFragment {
             @Override
             public void failure(RetrofitError error) {
                 Log.e(LOG_TAG_API, "failed to retrieve artist top tracks:\n" + error.toString());
-                Toast.makeText(getActivity(), "failed to retrieve artists. Possible network issues?: ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "failed to retrieve tracks. Possible network issues?: ", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -85,11 +87,17 @@ public class TrackViewFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Intent intent = getActivity().getIntent();
         View v = inflater.inflate(R.layout.fragment_tracks, container, false);
+        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (ab != null) {
+            String artistName = intent.getStringExtra("artistname");
+            ab.setSubtitle(artistName);
+        }
+
         if (!was_data_fetched) {
-            Intent intent = getActivity().getIntent();
-            String artist = intent.getStringExtra("artist");
-            fetchTracks(artist);
+            String artistId = intent.getStringExtra("artistid");
+            fetchTracks(artistId);
             was_data_fetched = true;
         }
         return v;

@@ -127,11 +127,12 @@ public class ArtistViewFragment extends ListFragment {
     }
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO: display popular tracks for artist
         Artist item = datalist.get(position);
 
         Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);
-        detailsIntent.putExtra("artist", item.id);
+        detailsIntent.putExtra("artistname", item.name);
+        detailsIntent.putExtra("artistid", item.id);
+        Log.d(LOG_TAG_APP, "artistname: "+item.name + ", artistid: "+item.id);
         if (detailsIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(detailsIntent);
         }
