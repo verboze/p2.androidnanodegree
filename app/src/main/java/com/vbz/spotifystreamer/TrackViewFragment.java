@@ -2,6 +2,7 @@ package com.vbz.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -27,9 +28,13 @@ import retrofit.client.Response;
 public class TrackViewFragment extends ListFragment {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
+    private static final String PARAM_ARTISTID = "artistid";
+    private static final String PARAM_ARTISTNAME = "artistname";
+
     private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
     private boolean was_data_fetched = false;
+    private String artistName = null;
 
     public TrackViewFragment() {
 
@@ -88,7 +93,7 @@ public class TrackViewFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Intent intent = getActivity().getIntent();
-        View v = inflater.inflate(R.layout.fragment_tracks, container, false);
+        View trackView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (ab != null) {
             String artistName = intent.getStringExtra("artistname");
@@ -96,11 +101,12 @@ public class TrackViewFragment extends ListFragment {
         }
 
         if (!was_data_fetched) {
-            String artistId = intent.getStringExtra("artistid");
+            artistName = intent.getStringExtra(PARAM_ARTISTNAME);
+            String artistId = intent.getStringExtra(PARAM_ARTISTID);
             fetchTracks(artistId);
             was_data_fetched = true;
         }
-        return v;
+        return trackView;
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -108,8 +114,20 @@ public class TrackViewFragment extends ListFragment {
     }
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO: display popular tracks for artist
-        Track item = datalist.get(position);
-        Toast.makeText(getActivity(), "Item clicked: " + item.name, Toast.LENGTH_SHORT).show();
+        Track track = datalist.get(position);
+        Toast.makeText(getActivity(), "Item clicked: " + track.name, Toast.LENGTH_SHORT).show();
+
+        // TODO: pass track info to fragment
+        // TODO: remove fragment when user clicks outside of player or hits back button
+        Fragment frag = new PlayerFragment();
+        Bundle args =  new Bundle();
+        args.putString("artist", artistName);
+        args.putString("album", track.album.name);
+        args.putString("track", track.name);
+        frag.setArguments(args);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .add(R.id.maincontainer, frag)
+                .addToBackStack(PlayerFragment.class.getName())
+                .commit();
     }
 }

@@ -1,11 +1,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/music_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:clickable="true"
+    android:onClick="dismissPlayer"
     tools:context=".MainActivityFragment"
     android:background="#88000000">
 <android.support.v7.widget.CardView
@@ -29,9 +32,10 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Track Title"
+            android:textStyle="bold"
+            android:text="Artist Name"
             android:maxLines="1"
-            android:id="@+id/txtTrackTitle"
+            android:id="@+id/plyrArtistName"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/imgAlbumArt"
             android:layout_alignParentRight="true"
@@ -40,14 +44,26 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="25dp"
-            android:text="Small Text"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Track Name"
             android:maxLines="1"
-            android:id="@+id/txtAlbumTitle"
-            android:layout_below="@+id/txtTrackTitle"
+            android:id="@+id/plyrTrackTitle"
+            android:layout_below="@+id/plyrArtistName"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/txtTrackTitle"
-            android:layout_alignStart="@+id/txtTrackTitle" />
+            android:layout_alignLeft="@+id/plyrArtistName"
+            android:layout_alignStart="@+id/plyrArtistName" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:text="Album Name"
+            android:maxLines="1"
+            android:id="@+id/plyrAlbumTitle"
+            android:layout_below="@+id/plyrTrackTitle"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignLeft="@+id/plyrTrackTitle"
+            android:layout_alignStart="@+id/plyrTrackTitle" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -55,7 +71,7 @@
             android:layout_height="wrap_content"
             android:weightSum="4"
             android:layout_alignBottom="@+id/imgAlbumArt"
-            android:layout_alignLeft="@+id/txtAlbumTitle"
+            android:layout_alignLeft="@+id/plyrAlbumTitle"
             android:layout_toEndOf="@+id/imgAlbumArt">
             <ImageButton
                 android:layout_width="0dip"
@@ -64,15 +80,26 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_skip_previous_black_48dp"
                 android:id="@+id/btnPrev" />
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2sp" />
             <ToggleButton
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_play_circle_filled_black_48dp"
+                android:background="@drawable/playbuttontoggle"
                 android:id="@+id/btnPayPause"
-                android:layout_marginLeft="25dp"
-                android:layout_marginRight="25dp" />
+                android:textOn=""
+                android:textOff=""
+                android:text=""
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp" />
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2sp" />
             <ImageButton
                 android:layout_width="0dip"
                 android:background="@android:color/transparent"

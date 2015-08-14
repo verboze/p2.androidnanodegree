@@ -2,10 +2,16 @@ package com.vbz.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.FrameLayout;
 
 public class TrackActivity extends AppCompatActivity {
+    private static final String LOG_TAG_APP = "SPOTSTREAMER";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,9 +36,35 @@ public class TrackActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-//            case R.id.action_settings:
-//            return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void dismissPlayer(View v) {
+        Log.d(LOG_TAG_APP, "popping player view: " + PlayerFragment.class.getName());
+        // TODO: fix. howcome it no work?!?
+//        getFragmentManager().popBackStack(PlayerFragment.class.getName(), 0);
+        getFragmentManager().popBackStack();
+    }
+
+    /*
+    FrameLayout player = (FrameLayout) findViewById(R.id.music_player);
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (player.isPressed()){
+            getFragmentManager().popBackStack();
+            return true;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+    player.setOnTouchListener(new OnTouchListener() {
+        @Override public boolean onTouch(View v, MotionEvent event) {
+            if (application.getDbManager().getUser().key.equals("-1")){
+                hideLoginFragment();
+                loginButton.setVisibility(View.VISIBLE);
+                exitButton.setVisibility(View.INVISIBLE);}
+            return false;
+        }
+    });
+    */
 }

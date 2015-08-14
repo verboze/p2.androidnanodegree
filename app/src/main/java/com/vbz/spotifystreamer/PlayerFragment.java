@@ -1,9 +1,8 @@
 package com.vbz.spotifystreamer;
 
-import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +10,47 @@ import android.widget.TextView;
 
 public class PlayerFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String LOG_TAG_APP = "SPOTSTREAMER";
+    private static final String LOG_TAG_FRAG = "SPOTPLAYER";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String ARG_PARAM1 = "artist";
+    private static final String ARG_PARAM2 = "album";
+    private static final String ARG_PARAM3 = "track";
 
+    private String artistName;
+    private String albumName;
+    private String trackName;
+
+    public PlayerFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            artistName = getArguments().getString(ARG_PARAM1);
+            albumName  = getArguments().getString(ARG_PARAM2);
+            trackName  = getArguments().getString(ARG_PARAM3);
+            Log.d(LOG_TAG_APP, "artist: " + artistName + ", track: " + trackName + ", album: " + albumName);
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // TODO: receive current track to player on load?
+        View playerView = inflater.inflate(R.layout.fragment_player, container, false);
+        TextView artistlabel = (TextView) playerView.findViewById(R.id.plyrArtistName);
+        TextView tracklabel  = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
+        TextView albumlabel  = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
+        artistlabel.setText(artistName);
+        tracklabel.setText(trackName);
+        albumlabel.setText(albumName);
+        return playerView;
+    }
+
+    /*
     private OnFragmentInteractionListener mListener;
 
     // TODO: Rename and change types and number of parameters
@@ -29,34 +61,6 @@ public class PlayerFragment extends Fragment {
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public PlayerFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -80,5 +84,6 @@ public class PlayerFragment extends Fragment {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
+    */
 
 }

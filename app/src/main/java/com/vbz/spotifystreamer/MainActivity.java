@@ -11,15 +11,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*
-        FragmentManager fm = getSupportFragmentManager();
-        artistfrag = (ArtistViewFragment) fm.findFragmentByTag(ARTIST_FRAGMENT);
-        if (artistfrag == null) {
-            artistfrag = new ArtistViewFragment();
-            fm.beginTransaction().add(R.id.maincontainer, artistfrag).commit();
-        }
-        */
-
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.maincontainer, new ArtistViewFragment())
@@ -34,18 +25,6 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-    */
 }
 
 // TODO: NICE TO HAVES:
