@@ -1,4 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+Class klass = org.bouncycastle.asn1.bc.BCObjectIdentifiers.class;
+URL location = klass.getResource('/'+klass.getName().replace('.', '/')+".class");
+println ">> BOUNCYPATH: " + location.toURI().toString();
 
 buildscript {
     repositories {
@@ -11,7 +14,6 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
-
 allprojects {
     repositories {
         jcenter()
