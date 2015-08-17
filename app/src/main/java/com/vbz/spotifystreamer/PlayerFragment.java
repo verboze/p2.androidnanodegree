@@ -10,16 +10,17 @@ import android.widget.TextView;
 
 public class PlayerFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
-    private static final String LOG_TAG_APP = "SPOTSTREAMER";
+    public static final String FRAGMENT_NAME = "SPOTPLAYER";
+    private static final String LOG_TAG_APP  = "SPOTSTREAMER";
     private static final String LOG_TAG_FRAG = "SPOTPLAYER";
 
     private static final String ARG_PARAM1 = "artist";
     private static final String ARG_PARAM2 = "album";
     private static final String ARG_PARAM3 = "track";
 
-    private String artistName;
-    private String albumName;
-    private String trackName;
+    private String mArtistName;
+    private String mAlbumName;
+    private String mTrackName;
 
     public PlayerFragment() {
         // Required empty public constructor
@@ -29,10 +30,10 @@ public class PlayerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            artistName = getArguments().getString(ARG_PARAM1);
-            albumName  = getArguments().getString(ARG_PARAM2);
-            trackName  = getArguments().getString(ARG_PARAM3);
-            Log.d(LOG_TAG_APP, "artist: " + artistName + ", track: " + trackName + ", album: " + albumName);
+            mArtistName = getArguments().getString(ARG_PARAM1);
+            mAlbumName = getArguments().getString(ARG_PARAM2);
+            mTrackName = getArguments().getString(ARG_PARAM3);
+            Log.d(LOG_TAG_APP, "artist: " + mArtistName + ", track: " + mTrackName + ", album: " + mAlbumName);
         }
     }
 
@@ -44,9 +45,9 @@ public class PlayerFragment extends Fragment {
         TextView artistlabel = (TextView) playerView.findViewById(R.id.plyrArtistName);
         TextView tracklabel  = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
         TextView albumlabel  = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
-        artistlabel.setText(artistName);
-        tracklabel.setText(trackName);
-        albumlabel.setText(albumName);
+        artistlabel.setText(mArtistName);
+        tracklabel.setText(mTrackName);
+        albumlabel.setText(mAlbumName);
         return playerView;
     }
 

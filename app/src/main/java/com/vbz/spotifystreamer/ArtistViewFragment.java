@@ -2,6 +2,7 @@ package com.vbz.spotifystreamer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -30,8 +31,8 @@ import retrofit.client.Response;
 public class ArtistViewFragment extends ListFragment {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
-    private List<Artist> datalist; // holds data retrieved from API
-    private SpotifyService spotifysvc = new SpotifyApi().getService();
+    private List<Artist> mDatalist; // holds data retrieved from API
+    private SpotifyService mSpotifysvc = new SpotifyApi().getService();
 
     public ArtistViewFragment() {
 
@@ -42,12 +43,12 @@ public class ArtistViewFragment extends ListFragment {
         final List<Artist> foundartists = new ArrayList<Artist>();
         final String usrquery = query;
 
-        spotifysvc.searchArtists(query, new Callback<ArtistsPager>() {
+        mSpotifysvc.searchArtists(query, new Callback<ArtistsPager>() {
             @Override
             public void success(ArtistsPager artists, Response response) {
                 List<Artist> artistlist = artists.artists.items;
                 Log.d(LOG_TAG_API, "found artists [" + artistlist.size() + "]: " + artistlist.toString());
-                datalist.clear();
+                mDatalist.clear();
 
                 if (artistlist.size() > 0) {
                     setListdata(artistlist);
@@ -67,9 +68,9 @@ public class ArtistViewFragment extends ListFragment {
     public void setListdata(List<Artist> data) {
         Log.d(LOG_TAG_APP, "data found: " + data.toString());
         for (Artist i : data) {
-            datalist.add(i);
+            mDatalist.add(i);
         }
-        setListAdapter(new ArtistListViewAdapter(getActivity(), datalist));
+        setListAdapter(new ArtistListViewAdapter(getActivity(), mDatalist));
     }
 
     @Override public void onCreate(Bundle savedinstanceSate) {
@@ -80,14 +81,14 @@ public class ArtistViewFragment extends ListFragment {
             // restore layout
             Log.d(LOG_TAG_APP, "restoring instance...?");
         } else {
-            datalist = new ArrayList<Artist>();
+            mDatalist = new ArrayList<Artist>();
         }
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         // set array adapter with empty data
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_artists, container, false);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -111,7 +112,7 @@ public class ArtistViewFragment extends ListFragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.d(LOG_TAG_APP, "listening for... " + newText);
+//                Log.d(LOG_TAG_APP, "listening for... " + newText);
                 return true;
             }
         });
@@ -127,8 +128,16 @@ public class ArtistViewFragment extends ListFragment {
     }
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
-        Artist item = datalist.get(position);
+        Artist item = mDatalist.get(position);
 
+        Bundle data = new Bundle();
+        data.putString("artistname", item.name);
+        data.putString("artistid", item.id);
+        SelectionCallback clickAction = (SelectionCallback) getActivity();
+        clickAction.onItemSelected(data);
+
+
+        /*
         Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);
         detailsIntent.putExtra("artistname", item.name);
         detailsIntent.putExtra("artistid", item.id);
@@ -139,10 +148,14 @@ public class ArtistViewFragment extends ListFragment {
         else {
             Toast.makeText(getActivity(), "could not find TackActivity", Toast.LENGTH_SHORT).show();
         }
+        */
     }
 
     @Override public void onSaveInstanceState(Bundle savedInstanceState) {
-//        savedInstanceState.put
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public interface SelectionCallback {
+        public void onItemSelected(Bundle data);
     }
 }

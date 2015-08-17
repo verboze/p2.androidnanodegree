@@ -26,6 +26,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 public class TrackViewFragment extends ListFragment {
+    public static final String FRAGMENT_NAME = "TRACKLIST";
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
     private static final String PARAM_ARTISTID = "artistid";
@@ -34,7 +35,8 @@ public class TrackViewFragment extends ListFragment {
     private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
     private boolean was_data_fetched = false;
-    private String artistName = null;
+    private String mArtistName = null;
+    private String mArtistId = null;
 
     public TrackViewFragment() {
 
@@ -92,20 +94,18 @@ public class TrackViewFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Intent intent = getActivity().getIntent();
+        Bundle args = getArguments();
+        mArtistName = args.getString("artistname");
+        mArtistId = args.getString("artistid");
+
         View trackView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (ab != null) {
-            String artistName = intent.getStringExtra("artistname");
-            ab.setSubtitle(artistName);
-        }
-
+        if (ab != null) { ab.setSubtitle(mArtistName); }
         if (!was_data_fetched) {
-            artistName = intent.getStringExtra(PARAM_ARTISTNAME);
-            String artistId = intent.getStringExtra(PARAM_ARTISTID);
-            fetchTracks(artistId);
+            fetchTracks(mArtistId);
             was_data_fetched = true;
         }
+
         return trackView;
     }
 
@@ -121,12 +121,12 @@ public class TrackViewFragment extends ListFragment {
         // TODO: remove fragment when user clicks outside of player or hits back button
         Fragment frag = new PlayerFragment();
         Bundle args =  new Bundle();
-        args.putString("artist", artistName);
+        args.putString("artist", mArtistName);
         args.putString("album", track.album.name);
         args.putString("track", track.name);
         frag.setArguments(args);
         getActivity().getSupportFragmentManager().beginTransaction()
-                .add(R.id.maincontainer, frag)
+                .add(R.id.tracks_fragment_container, frag)
                 .addToBackStack(PlayerFragment.class.getName())
                 .commit();
     }
