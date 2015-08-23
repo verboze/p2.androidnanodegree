@@ -2,6 +2,7 @@ package com.vbz.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
@@ -37,6 +38,8 @@ public class TrackViewFragment extends ListFragment {
     private boolean was_data_fetched = false;
     private String mArtistName = null;
     private String mArtistId = null;
+
+    // TODO: handle fragment lifecycle (especially rotation cases)
 
     public TrackViewFragment() {
 
@@ -91,9 +94,7 @@ public class TrackViewFragment extends ListFragment {
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
         mArtistName = args.getString("artistname");
         mArtistId = args.getString("artistid");
@@ -115,19 +116,19 @@ public class TrackViewFragment extends ListFragment {
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
         Track track = datalist.get(position);
-        Toast.makeText(getActivity(), "Item clicked: " + track.name, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "Item clicked: " + track.name, Toast.LENGTH_SHORT).show();
 
-        // TODO: pass track info to fragment
-        // TODO: remove fragment when user clicks outside of player or hits back button
-        Fragment frag = new PlayerFragment();
+        // TODO: IMPORTANT! show player as normal activity on phone (and as popup on tablet)
         Bundle args =  new Bundle();
         args.putString("artist", mArtistName);
         args.putString("album", track.album.name);
         args.putString("track", track.name);
-        frag.setArguments(args);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .add(R.id.tracks_fragment_container, frag)
-                .addToBackStack(PlayerFragment.class.getName())
-                .commit();
+        showPlayer(args);
+    }
+
+    public void showPlayer(Bundle trackdata) {
+        DialogFragment player = new PlayerDialogFragment();
+        player.setArguments(trackdata);
+        player.show(getActivity().getSupportFragmentManager(), this.FRAGMENT_NAME);
     }
 }

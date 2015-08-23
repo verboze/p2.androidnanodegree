@@ -47,8 +47,7 @@ public class TrackActivity extends AppCompatActivity {
     }
 
     public void dismissPlayer(View v) {
-        Log.d(LOG_TAG_APP, "popping player view: " + PlayerFragment.class.getName());
-        // TODO: fix. howcome it no work?!?
-        getFragmentManager().popBackStack(PlayerFragment.FRAGMENT_NAME, 0);
+        Log.d(LOG_TAG_APP, "popping player view: " + PlayerDialogFragment.class.getName());
+//        getFragmentManager().popBackStack(PlayerDialogFragment.FRAGMENT_NAME, 0);
     }
 }

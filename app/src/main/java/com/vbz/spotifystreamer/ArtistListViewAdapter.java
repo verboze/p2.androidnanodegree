@@ -16,6 +16,7 @@ import kaaes.spotify.webapi.android.models.Artist;
 
 /* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
 public class ArtistListViewAdapter extends ArrayAdapter<Artist> {
+    // TODO: importnat! change this into a content provider
     private static final String emptyartisturl = "https://pbs.twimg.com/profile_images/2481881216/i29qdpcln2fiakaoii4p_400x400.gif";
 
     public ArtistListViewAdapter(Context context, List<Artist> items) {

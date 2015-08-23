@@ -1,14 +1,18 @@
 package com.vbz.spotifystreamer;
 
+import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
-public class PlayerDialogFragment extends Fragment {
+public class PlayerDialogFragment extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     public static final String FRAGMENT_NAME = "SPOTPLAYER";
     private static final String LOG_TAG_APP  = "SPOTSTREAMER";
@@ -21,6 +25,9 @@ public class PlayerDialogFragment extends Fragment {
     private String mArtistName;
     private String mAlbumName;
     private String mTrackName;
+
+    // TODO: handle fragment lifecycle (especially rotation cases)
+    // TODO: implement onClickListeners for player buttons
 
     public PlayerDialogFragment() {
         // Required empty public constructor
@@ -38,25 +45,34 @@ public class PlayerDialogFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         // TODO: receive current track to player on load?
-        View playerView = inflater.inflate(R.layout.fragment_player, container, false);
-        TextView artistlabel = (TextView) playerView.findViewById(R.id.plyrArtistName);
-        TextView tracklabel  = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
-        TextView albumlabel  = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
-        artistlabel.setText(mArtistName);
-        tracklabel.setText(mTrackName);
-        albumlabel.setText(mAlbumName);
-        return playerView;
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        View playerView = inflater.inflate(R.layout.fragment_player, null);
+        ((TextView) playerView.findViewById(R.id.plyrArtistName)).setText(mArtistName);
+        ((TextView) playerView.findViewById(R.id.plyrTrackTitle)).setText(mTrackName);
+        ((TextView) playerView.findViewById(R.id.plyrAlbumTitle)).setText(mAlbumName);
+        builder.setView(playerView);
+        Dialog popupPlayer = builder.create();
+
+        // align modal player window to bottom of screen
+        Window win = popupPlayer.getWindow();
+        WindowManager.LayoutParams wlp = win.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+
+        return popupPlayer;
     }
 
     /*
     private OnFragmentInteractionListener mListener;
 
     // TODO: Rename and change types and number of parameters
-    public static PlayerFragment newInstance(String param1, String param2) {
-        PlayerFragment fragment = new PlayerFragment();
+    public static PlayerDialogFragment newInstance(String param1, String param2) {
+        PlayerDialogFragment fragment = new PlayerDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -86,5 +102,4 @@ public class PlayerDialogFragment extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
     */
-
 }

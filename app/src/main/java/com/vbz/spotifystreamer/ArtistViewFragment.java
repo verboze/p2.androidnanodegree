@@ -38,6 +38,8 @@ public class ArtistViewFragment extends ListFragment {
 
     }
 
+    // TODO: handle fragment lifecycle (especially rotation cases)
+
     private void search(String query) {
         // TODO: make it a bit more user friendly, show spinners while loading, etc
         final List<Artist> foundartists = new ArrayList<Artist>();

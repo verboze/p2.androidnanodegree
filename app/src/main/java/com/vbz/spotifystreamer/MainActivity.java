@@ -34,16 +34,14 @@ public class MainActivity extends AppCompatActivity implements ArtistViewFragmen
     @Override public void onItemSelected(Bundle data) {
         // handle list item click, dispatch track detail to either
         // a new activity or to an adjacent fragment
+        // TODO: IMPORTANT! fix 'rotate from landscape to normal' crashes app No view found for id 0x7f0c0051
         if (mTwoPanes) {
-            Toast.makeText(this, "launching fragment for details", Toast.LENGTH_SHORT).show();
             TrackViewFragment tvf = new TrackViewFragment();
             tvf.setArguments(data);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.tracks_fragment_container, tvf, TrackViewFragment.FRAGMENT_NAME)
                     .commit();
         } else {
-            Toast.makeText(this, "launching new activity for details", Toast.LENGTH_SHORT).show();
-
             Intent detailsIntent = new Intent(this, TrackActivity.class);
             detailsIntent.putExtra("artistname", data.getString("artistname"));
             detailsIntent.putExtra("artistid", data.getString("artistid"));
