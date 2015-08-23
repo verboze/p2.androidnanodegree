@@ -46,12 +46,12 @@ public class ArtistListViewAdapter extends ArrayAdapter<Artist> {
         if (item.images.size() > 0) {
             Picasso.with(getContext())
                     .load(item.images.get(0).url)
-                    .resize(250, 250)
+                    .resize(100, 100)
                     .into(viewHolder.ivCover);
         } else {
             Picasso.with(getContext())
                     .load(emptyartisturl)
-                    .resize(250, 250)
+                    .resize(100, 100)
                     .into(viewHolder.ivCover);
         }
 

@@ -1,0 +1,129 @@
+<!-- TODO: move string resources to string.xml -->
+<!-- TODO: fix stretching of image buttons -->
+<!-- TODO: refactor layout -->
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/music_player"
+    android:layout_gravity="bottom|center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="4dp">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/imgAlbumArt"
+            android:layout_weight="2"
+            android:layout_centerVertical="true"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:padding="4dp"
+            android:src="@android:color/holo_blue_dark" />
+
+        <LinearLayout
+            android:layout_weight="4"
+            android:layout_toRightOf="@+id/imgAlbumArt"
+            android:layout_toLeftOf="@+id/playerControls"
+            android:orientation="vertical"
+            android:layout_centerVertical="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/plyrArtistName"
+                android:paddingLeft="8dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:text="Artist Name"
+                android:maxLines="1"/>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/plyrTrackTitle"
+                    android:paddingLeft="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Track Name"
+                    android:maxLines="1" />
+                <TextView
+                    android:text="/"
+                    android:paddingLeft="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/plyrAlbumTitle"
+                    android:paddingLeft="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Album Name"
+                    android:maxLines="1" />
+            </LinearLayout>
+            <SeekBar
+                android:id="@+id/musicSeekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <RelativeLayout
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/elapsedTime"
+                    android:text="00:08"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_alignParentLeft="true" />
+                <TextView
+                    android:id="@+id/duration"
+                    android:text="04:41"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_alignParentRight="true" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/playerControls"
+            android:layout_weight="2"
+            android:padding="4dp"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:layout_width="150dp">
+            <ImageButton
+                android:id="@+id/btnPrev"
+                android:layout_weight="2"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_skip_previous_black_48dp" />
+            <ToggleButton
+                android:id="@+id/btnPayPause"
+                android:layout_weight="2"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/playbuttontoggle"
+                android:textOn=""
+                android:textOff=""
+                android:text="" />
+            <ImageButton
+                android:id="@+id/btnNext"
+                android:layout_weight="2"
+                android:layout_gravity="center"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_skip_next_black_48dp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

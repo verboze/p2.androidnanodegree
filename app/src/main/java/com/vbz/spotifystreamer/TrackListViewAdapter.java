@@ -55,7 +55,7 @@ public class TrackListViewAdapter extends ArrayAdapter<Track> {
         } else {
             Picasso.with(getContext())
                     .load(emptycoverurl)
-                    .resize(250, 250)
+                    .resize(100, 100)
                     .into(viewHolder.ivCover);
         }
 
