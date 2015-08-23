@@ -45,9 +45,4 @@ public class TrackActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    public void dismissPlayer(View v) {
-        Log.d(LOG_TAG_APP, "popping player view: " + PlayerDialogFragment.class.getName());
-//        getFragmentManager().popBackStack(PlayerDialogFragment.FRAGMENT_NAME, 0);
-    }
 }
