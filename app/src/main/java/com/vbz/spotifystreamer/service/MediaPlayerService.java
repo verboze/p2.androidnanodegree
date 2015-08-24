@@ -9,27 +9,21 @@ import android.util.Log;
 import com.vbz.spotifystreamer.data.SpotifyDataStore;
 import com.vbz.spotifystreamer.utils.MockData;
 
-import kaaes.spotify.webapi.android.models.Track;
-
 public class MediaPlayerService extends IntentService {
     private static final String LOG_TAG = MediaPlayerService.class.getSimpleName();
+    private static final String EXTRA_TRACkURL = "com.vbz.spotifystreamer.service.extra.TRACKURL";
     public static final String ACTION_PLAY = "com.vbz.spotifystreamer.service.action.PLAY";
     public static final String ACTION_PAUSE = "com.vbz.spotifystreamer.service.action.PAUSE";
     public static final String ACTION_STOP = "com.vbz.spotifystreamer.service.action.STOP";
-    public static final String ACTION_PREV = "com.vbz.spotifystreamer.service.action.PREV";
-    public static final String ACTION_NEXT = "com.vbz.spotifystreamer.service.action.NEXT";
-
-    private static final String EXTRA_ARTISTID = "com.vbz.spotifystreamer.service.extra.ARTISTID";
-    private static final String EXTRA_TRACKID = "com.vbz.spotifystreamer.service.extra.TRACKID";
 
     private final MockData mockdata = new MockData();
     private SQLiteDatabase mDb;
+    private String mCurrTrack;
 
-    public static void startAction(Context context, String action, String artistid, String trackid) {
+    public static void startAction(Context context, String action, String trackurl) {
         Intent intent = new Intent(context, MediaPlayerService.class);
         intent.setAction(action);
-        intent.putExtra(EXTRA_ARTISTID, artistid);
-        intent.putExtra(EXTRA_TRACKID, trackid);
+        intent.putExtra(EXTRA_TRACkURL, trackurl);
         context.startService(intent);
     }
 
@@ -42,57 +36,38 @@ public class MediaPlayerService extends IntentService {
         super.onCreate();
         mockdata.create(this);
         mDb = new SpotifyDataStore(this).getReadableDatabase();
+        mCurrTrack = null;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            final String artistid = intent.getStringExtra(EXTRA_ARTISTID);
-            final String trackid = intent.getStringExtra(EXTRA_TRACKID);
-            handleAction(action, artistid, trackid);
+            mCurrTrack = intent.getStringExtra(EXTRA_TRACkURL);
+            handleAction(action);
         }
     }
 
-    private void handleAction(String action, String artistid, String trackid) {
-        // TODO: read database, find all tracks by artist, find trackid (idx) in cursor, cursor.move(idx)
+    private void handleAction(String action) {
         switch(action) {
-            case ACTION_PLAY:  play(artistid, trackid);  break;
-            case ACTION_PAUSE: pause(artistid, trackid); break;
-            case ACTION_STOP:  stop(artistid, trackid);  break;
-            case ACTION_PREV:  prev(artistid, trackid);  break;
-            case ACTION_NEXT:  next(artistid, trackid);  break;
+            case ACTION_PLAY:  play();  break;
+            case ACTION_PAUSE: pause(); break;
+            case ACTION_STOP:  stop();  break;
             default:           Log.d(LOG_TAG, "invalid action: " + action); break;
         }
     }
 
-    private void play(String artistid, String trackid) {
-        String playerdata = " ARTIST: " + artistid + " TRACK: " + trackid;
-        Log.d(LOG_TAG, "Action: "+ ACTION_PLAY + playerdata);
+    private void play() {
+        Log.d(LOG_TAG, "Action: "+ ACTION_PLAY + " URL: " + mCurrTrack);
 
     }
 
-    private void pause(String artistid, String trackid) {
-        String playerdata = " ARTIST: " + artistid + " TRACK: " + trackid;
-        Log.d(LOG_TAG, "Action: "+ ACTION_PAUSE + playerdata);
-
+    private void pause() {
+        Log.d(LOG_TAG, "Action: "+ ACTION_PAUSE + " URL: " + mCurrTrack);
     }
 
-    private void stop(String artistid, String trackid) {
-        String playerdata = " ARTIST: " + artistid + " TRACK: " + trackid;
-        Log.d(LOG_TAG, "Action: "+ ACTION_STOP + playerdata);
-
-    }
-
-    private void prev(String artistid, String trackid) {
-        String playerdata = " ARTIST: " + artistid + " TRACK: " + trackid;
-        Log.d(LOG_TAG, "Action: "+ ACTION_PREV + playerdata);
-
-    }
-
-    private void next(String artistid, String trackid) {
-        String playerdata = " ARTIST: " + artistid + " TRACK: " + trackid;
-        Log.d(LOG_TAG, "Action: "+ ACTION_NEXT + playerdata);
+    private void stop() {
+        Log.d(LOG_TAG, "Action: "+ ACTION_STOP);
 
     }
 }

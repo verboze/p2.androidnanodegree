@@ -70,25 +70,23 @@ public class PlayerDialogFragment extends DialogFragment {
                     // TODO: retrieve idx. use a member var to track cursor position?
                     if (isChecked) {
                         MediaPlayerService.startAction(getActivity(),
-                                MediaPlayerService.ACTION_PAUSE, mArtistName, mTrackName);
+                                MediaPlayerService.ACTION_PAUSE, mTrackName);
                     } else {
                         MediaPlayerService.startAction(getActivity(),
-                                MediaPlayerService.ACTION_PLAY, mArtistName, mTrackName);
+                                MediaPlayerService.ACTION_PLAY, mTrackName);
                     }
                 }
         });
         playerView.findViewById(R.id.btnPrev).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                // TODO: retrieve idx. use a member var to track cursor position?
                 MediaPlayerService.startAction(getActivity(),
-                        MediaPlayerService.ACTION_PREV, mArtistName, mTrackName);
+                        MediaPlayerService.ACTION_PLAY, " -1 " + mTrackName);
             }
         });
         playerView.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                // TODO: retrieve idx. use a member var to track cursor position?
                 MediaPlayerService.startAction(getActivity(),
-                        MediaPlayerService.ACTION_NEXT, mArtistName, mTrackName);
+                        MediaPlayerService.ACTION_PLAY, " +1 " + mTrackName);
             }
         });
 
