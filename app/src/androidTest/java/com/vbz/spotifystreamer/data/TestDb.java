@@ -43,6 +43,8 @@ public class TestDb extends AndroidTestCase {
                     + "' did not match the expected value '" + expectedValue + "'. "
                     + errmsg, expectedValue, c.getString(idx));
         }
+
+        c.close();
     }
 
     public void setUp() {

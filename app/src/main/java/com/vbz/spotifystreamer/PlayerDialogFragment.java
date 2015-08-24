@@ -1,6 +1,7 @@
 package com.vbz.spotifystreamer;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,7 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import com.vbz.spotifystreamer.service.MediaPlayerService;
 
 public class PlayerDialogFragment extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -56,6 +62,37 @@ public class PlayerDialogFragment extends DialogFragment {
         ((TextView) playerView.findViewById(R.id.plyrArtistName)).setText(mArtistName);
         ((TextView) playerView.findViewById(R.id.plyrTrackTitle)).setText(mTrackName);
         ((TextView) playerView.findViewById(R.id.plyrAlbumTitle)).setText(mAlbumName);
+
+        // define actions for the player buttons
+        ((ToggleButton) playerView.findViewById(R.id.btnPayPause))
+                .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    // TODO: retrieve idx. use a member var to track cursor position?
+                    if (isChecked) {
+                        MediaPlayerService.startAction(getActivity(),
+                                MediaPlayerService.ACTION_PAUSE, mArtistName, mTrackName);
+                    } else {
+                        MediaPlayerService.startAction(getActivity(),
+                                MediaPlayerService.ACTION_PLAY, mArtistName, mTrackName);
+                    }
+                }
+        });
+        playerView.findViewById(R.id.btnPrev).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                // TODO: retrieve idx. use a member var to track cursor position?
+                MediaPlayerService.startAction(getActivity(),
+                        MediaPlayerService.ACTION_PREV, mArtistName, mTrackName);
+            }
+        });
+        playerView.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                // TODO: retrieve idx. use a member var to track cursor position?
+                MediaPlayerService.startAction(getActivity(),
+                        MediaPlayerService.ACTION_NEXT, mArtistName, mTrackName);
+            }
+        });
+
+        //build player UI
         builder.setView(playerView);
         Dialog popupPlayer = builder.create();
 
@@ -66,40 +103,4 @@ public class PlayerDialogFragment extends DialogFragment {
 
         return popupPlayer;
     }
-
-    /*
-    private OnFragmentInteractionListener mListener;
-
-    // TODO: Rename and change types and number of parameters
-    public static PlayerDialogFragment newInstance(String param1, String param2) {
-        PlayerDialogFragment fragment = new PlayerDialogFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
-    */
-}
