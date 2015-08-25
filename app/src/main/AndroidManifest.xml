@@ -32,7 +32,7 @@
         </activity>
 
         <service
-            android:name=".service.MediaPlayerService"
+            android:name=".service.StreamerService"
             android:exported="false" >
         </service>
     </application>

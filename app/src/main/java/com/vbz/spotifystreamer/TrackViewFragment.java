@@ -123,6 +123,9 @@ public class TrackViewFragment extends ListFragment {
         args.putString("artist", mArtistName);
         args.putString("album", track.album.name);
         args.putString("track", track.name);
+        args.putString("trackurl", track.preview_url);
+        args.putString("artistid", mArtistId);
+        args.putString("trackid", track.id);
         showPlayer(args);
     }
 

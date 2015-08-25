@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.vbz.spotifystreamer.data.SpotifyDataStore;
+import com.vbz.spotifystreamer.data.SpotifyCacheDb;
 import com.vbz.spotifystreamer.data.SpotifyDataContract.ArtistEntry;
 import com.vbz.spotifystreamer.data.SpotifyDataContract.TrackEntry;
 
@@ -19,7 +19,7 @@ public class MockData {
 //        return;
 
         // dummy data used for development
-        SQLiteDatabase db = new SpotifyDataStore(ctx).getWritableDatabase();
+        SQLiteDatabase db = new SpotifyCacheDb(ctx).getWritableDatabase();
 
         String[] columns = null;
         String[] selectionargs = {"999"};
@@ -52,8 +52,8 @@ public class MockData {
             trackdata.put(TrackEntry.COLUMN_ARTISTID, idx);
             trackdata.put(TrackEntry.COLUMN_TRACKNAME, "mock - Thank Me Later");
             trackdata.put(TrackEntry.COLUMN_TRACKALBUM, "Nothing Was The Same");
-            trackdata.put(TrackEntry.COLUMN_TRACKIMG, "http://images.com/album/thank_me_later.jpg");
-            trackdata.put(TrackEntry.COLUMN_TRACKPLAYBACKURL, "http://www.albumartexchange.com/gallery/images/public/mc/_mcarey-butter_10.tn.jpg");
+            trackdata.put(TrackEntry.COLUMN_TRACKIMG, "http://www.albumartexchange.com/gallery/images/public/mc/_mcarey-butter_10.tn.jpg");
+            trackdata.put(TrackEntry.COLUMN_TRACKPLAYBACKURL, "http://listen.radionomy.com:80/R-n-BCream");
             db.insert(TrackEntry.TABLE_NAME, null, trackdata);
 
             trackdata = new ContentValues();
@@ -61,8 +61,8 @@ public class MockData {
             trackdata.put(TrackEntry.COLUMN_ARTISTID, idx);
             trackdata.put(TrackEntry.COLUMN_TRACKNAME, "mock - 6 God");
             trackdata.put(TrackEntry.COLUMN_TRACKALBUM, "Nothing Was The Same");
-            trackdata.put(TrackEntry.COLUMN_TRACKIMG, "http://images.com/album/6_god.jpg");
-            trackdata.put(TrackEntry.COLUMN_TRACKPLAYBACKURL, "http://www.albumartexchange.com/gallery/images/public/ca/_camel-echoes_07.tn.jpg");
+            trackdata.put(TrackEntry.COLUMN_TRACKIMG, "http://www.albumartexchange.com/gallery/images/public/ca/_camel-echoes_07.tn.jpg");
+            trackdata.put(TrackEntry.COLUMN_TRACKPLAYBACKURL, "http://listen.radionomy.com/RGMediaRadio");
             db.insert(TrackEntry.TABLE_NAME, null, trackdata);
         }
 
@@ -79,7 +79,7 @@ public class MockData {
         sql1 = "delete from " + ArtistEntry.TABLE_NAME + ";";
         sql2 = "delete from " + TrackEntry.TABLE_NAME + ";";
 
-        SQLiteDatabase db = new SpotifyDataStore(ctx).getWritableDatabase();
+        SQLiteDatabase db = new SpotifyCacheDb(ctx).getWritableDatabase();
         db.execSQL(sql1);
         db.execSQL(sql2);
         db.close();

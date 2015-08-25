@@ -1,7 +1,10 @@
 package com.vbz.spotifystreamer;
 
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -12,28 +15,63 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.vbz.spotifystreamer.service.MediaPlayerService;
+import com.vbz.spotifystreamer.data.SpotifyCacheReader;
+import com.vbz.spotifystreamer.service.StreamerService;
+import com.vbz.spotifystreamer.service.StreamerService.StreamerBinder;
 
 public class PlayerDialogFragment extends DialogFragment {
-    // TODO: Rename parameter arguments, choose names that match
+    // TODO: handle fragment lifecycle (especially rotation cases)
     public static final String FRAGMENT_NAME = "SPOTPLAYER";
     private static final String LOG_TAG_APP  = "SPOTSTREAMER";
     private static final String LOG_TAG_FRAG = "SPOTPLAYER";
 
-    private static final String ARG_PARAM1 = "artist";
-    private static final String ARG_PARAM2 = "album";
-    private static final String ARG_PARAM3 = "track";
+    private static final String ARG_ARTIST = "artist";
+    private static final String ARG_ALBUM = "album";
+    private static final String ARG_TRACK = "track";
+    private static final String ARG_ARTISTID = "artistid";
+    private static final String ARG_TRACKID = "trackid";
+    private static final String ARG_TRACKURL = "trackurl";
 
-    private String mArtistName;
-    private String mAlbumName;
-    private String mTrackName;
+    private String _mArtistName;
+    private String _mAlbumName;
+    private String _mTrackName;
 
-    // TODO: handle fragment lifecycle (especially rotation cases)
-    // TODO: implement onClickListeners for player buttons
+    private String mArtistId;
+    private String mTrackId;
+    private String mCurrTrack;
+    boolean mBound = false;
+    StreamerService mService;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Log.d(LOG_TAG_APP, "serviceConnected binding service...");
+            StreamerBinder binder = (StreamerBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.d(LOG_TAG_APP, "disconnecting service...");
+            mBound = false;
+        }
+    };
+
+    private String getPrevTrack() {
+        // TODO: read from cursor
+        return "https://p.scdn.co/mp3-preview/f7bf16ca988662cb1181f6b9a968992f98187b9c";
+    }
+
+    private String getNextTrack() {
+        // TODO: read from cursor
+        return "https://p.scdn.co/mp3-preview/dd7136085ecdaa8492a805b1b86814bc572252eb";
+    }
 
     public PlayerDialogFragment() {
         // Required empty public constructor
@@ -43,50 +81,61 @@ public class PlayerDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mArtistName = getArguments().getString(ARG_PARAM1);
-            mAlbumName = getArguments().getString(ARG_PARAM2);
-            mTrackName = getArguments().getString(ARG_PARAM3);
-            Log.d(LOG_TAG_APP, "artist: " + mArtistName + ", track: " + mTrackName + ", album: " + mAlbumName);
+            _mArtistName = getArguments().getString(ARG_ARTIST);
+            _mAlbumName = getArguments().getString(ARG_ALBUM);
+            _mTrackName = getArguments().getString(ARG_TRACK);
+            mArtistId = getArguments().getString(ARG_ARTISTID);
+            mTrackId = getArguments().getString(ARG_TRACKID);
+            mCurrTrack = getArguments().getString(ARG_TRACKURL);
+            Log.d(LOG_TAG_APP, "artist: " + _mArtistName + ", track: " + _mTrackName
+                  + ", album: " + _mAlbumName + ", artistid: " + mArtistId + ", trackid: " + mTrackId);
         }
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // TODO: receive current track to player on load?
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        View playerView = inflater.inflate(R.layout.fragment_player, null);
-        ((TextView) playerView.findViewById(R.id.plyrArtistName)).setText(mArtistName);
-        ((TextView) playerView.findViewById(R.id.plyrTrackTitle)).setText(mTrackName);
-        ((TextView) playerView.findViewById(R.id.plyrAlbumTitle)).setText(mAlbumName);
+        final View playerView = inflater.inflate(R.layout.fragment_player, null);
+        ((TextView) playerView.findViewById(R.id.plyrArtistName)).setText(_mArtistName);
+        ((TextView) playerView.findViewById(R.id.plyrTrackTitle)).setText(_mTrackName);
+        ((TextView) playerView.findViewById(R.id.plyrAlbumTitle)).setText(_mAlbumName);
 
-        // define actions for the player buttons
+        // define listeners for the player buttons
         ((ToggleButton) playerView.findViewById(R.id.btnPayPause))
                 .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    // TODO: retrieve idx. use a member var to track cursor position?
-                    if (isChecked) {
-                        MediaPlayerService.startAction(getActivity(),
-                                MediaPlayerService.ACTION_PAUSE, mTrackName);
-                    } else {
-                        MediaPlayerService.startAction(getActivity(),
-                                MediaPlayerService.ACTION_PLAY, mTrackName);
-                    }
+                    if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+                    if (isChecked) { mService.play(mCurrTrack);
+                    } else { mService.pause(); }
                 }
         });
+        playerView.findViewById(R.id.btnPayPause).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                playerView.findViewById(R.id.btnPayPause).setBackgroundResource(R.drawable.ic_play_circle_filled_black_48dp);
+                if(mBound) { mService.stop(); }
+                else { Log.d(LOG_TAG_APP, "service not bound!!"); }
+                return true;
+            }
+        });
         playerView.findViewById(R.id.btnPrev).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                MediaPlayerService.startAction(getActivity(),
-                        MediaPlayerService.ACTION_PLAY, " -1 " + mTrackName);
+            @Override
+            public void onClick(View v) {
+                if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+                mCurrTrack = getPrevTrack();
+                mService.play(mCurrTrack);
             }
         });
         playerView.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                MediaPlayerService.startAction(getActivity(),
-                        MediaPlayerService.ACTION_PLAY, " +1 " + mTrackName);
+            @Override
+            public void onClick(View v) {
+                if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+                mCurrTrack = getNextTrack();
+                mService.play(mCurrTrack);
             }
         });
 
@@ -101,4 +150,20 @@ public class PlayerDialogFragment extends DialogFragment {
 
         return popupPlayer;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // bind streamer service to enable playback on track click
+        Log.d(LOG_TAG_APP, "starting player. should be binding here...");
+        Intent intent = new Intent(getActivity(), StreamerService.class);
+        getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
     }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG_APP, "destroying player");
+        super.onDestroy();
+        getActivity().unbindService(mConnection);
+    }
+}

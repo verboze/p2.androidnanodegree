@@ -51,7 +51,7 @@ public class TrackListViewAdapter extends ArrayAdapter<Track> {
         if (item.album.images.size() > 0) {
             Picasso.with(getContext())
                     .load(item.album.images.get(0).url)
-                    .resize(250, 250)
+                    .resize(100, 100)
                     .into(viewHolder.ivCover);
         } else {
             Picasso.with(getContext())

@@ -18,7 +18,7 @@ public class TestDb extends AndroidTestCase {
     public static final String LOG_TAG = TestDb.class.getSimpleName().toUpperCase();
 
     void deleteTheDatabase() {
-        mContext.deleteDatabase(SpotifyDataStore.DATABASE_NAME);
+        mContext.deleteDatabase(SpotifyCacheDb.DATABASE_NAME);
     }
 
     public long insertRecord(ContentValues data, SQLiteDatabase db, String tableName) {
@@ -56,7 +56,7 @@ public class TestDb extends AndroidTestCase {
         final HashSet<String> tableNames = new HashSet<String>();
         tableNames.add(ArtistEntry.TABLE_NAME);
         tableNames.add(TrackEntry.TABLE_NAME);
-        SQLiteDatabase db = new SpotifyDataStore(this.mContext).getWritableDatabase();
+        SQLiteDatabase db = new SpotifyCacheDb(this.mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
 
         // verify that the tables have been created
@@ -112,7 +112,7 @@ public class TestDb extends AndroidTestCase {
     public void testArtistTable() {
         // Insert ContentValues into database and get a row ID back
         Log.d(LOG_TAG, "test artist table insert...");
-        SQLiteDatabase db = new SpotifyDataStore(mContext).getWritableDatabase();
+        SQLiteDatabase db = new SpotifyCacheDb(mContext).getWritableDatabase();
 
         ContentValues artistdata = new ContentValues();
         artistdata.put(ArtistEntry.COLUMN_ARTISTID, "123");
@@ -127,7 +127,7 @@ public class TestDb extends AndroidTestCase {
 
     public void testTrackTable() {
         Log.d(LOG_TAG, "test track table insert...");
-        SQLiteDatabase db = new SpotifyDataStore(mContext).getWritableDatabase();
+        SQLiteDatabase db = new SpotifyCacheDb(mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
 
         // we first insert artist data, because it's referenced in track table
