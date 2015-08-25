@@ -1,14 +1,16 @@
 package com.vbz.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 
-public class TrackActivity extends AppCompatActivity {
+public class TrackActivity extends AppCompatActivity
+        implements TrackViewFragment.onTrackChangedListener {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
 
     @Override
@@ -24,7 +26,7 @@ public class TrackActivity extends AppCompatActivity {
             tvf.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.tracks_fragment_container, tvf)
+                    .add(R.id.tracks_fragment_container, tvf, TrackViewFragment.FRAGMENT_NAME)
                     .commit();
         }
     }
@@ -44,5 +46,33 @@ public class TrackActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public Bundle getPrevTrack() {
+        TrackViewFragment tv =
+                (TrackViewFragment) getSupportFragmentManager()
+                    .findFragmentByTag(TrackViewFragment.FRAGMENT_NAME);
+        if(tv != null) {
+            Bundle res = tv.getTrackDataByOffset(-1);
+            if (res == null) Toast.makeText(this, "already at beginning of list", Toast.LENGTH_SHORT).show();
+            return res;
+        } else {
+            Log.d(LOG_TAG_APP, "could not retrieve fragment: " + TrackViewFragment.FRAGMENT_NAME);
+            return null;
+        }
+    }
+
+    public Bundle getNextTrack() {
+        TrackViewFragment tv =
+                (TrackViewFragment) getSupportFragmentManager()
+                        .findFragmentByTag(TrackViewFragment.FRAGMENT_NAME);
+        if(tv != null) {
+            Bundle res = tv.getTrackDataByOffset(+1);
+            if (res == null) Toast.makeText(this, "already at end of list", Toast.LENGTH_SHORT).show();
+            return res;
+        } else {
+            Log.d(LOG_TAG_APP, "could not retrieve fragment: " + TrackViewFragment.FRAGMENT_NAME);
+            return null;
+        }
     }
 }

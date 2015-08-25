@@ -1,9 +1,10 @@
 package com.vbz.spotifystreamer;
 
-import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,9 @@ public class TrackViewFragment extends ListFragment {
     private boolean was_data_fetched = false;
     private String mArtistName = null;
     private String mArtistId = null;
+    private Cursor mCursor = null;
+    private boolean mIsLargeLayout = false;
+    private int mCurrPos = 0;
 
     // TODO: handle fragment lifecycle (especially rotation cases)
 
@@ -46,7 +50,6 @@ public class TrackViewFragment extends ListFragment {
     }
 
     private void fetchTracks(String artistid) {
-        // TODO: retrieve data from network using spotify API
         Log.d(LOG_TAG_APP, "looking up tracks for " + artistid + "...");
         HashMap<String, Object> country = new HashMap<String, Object>();
         country.put("country", "us");
@@ -115,10 +118,8 @@ public class TrackViewFragment extends ListFragment {
     }
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        /*
         Track track = datalist.get(position);
-//        Toast.makeText(getActivity(), "Item clicked: " + track.name, Toast.LENGTH_SHORT).show();
-
-        // TODO: IMPORTANT! show player as normal activity on phone (and as popup on tablet)
         Bundle args =  new Bundle();
         args.putString("artist", mArtistName);
         args.putString("album", track.album.name);
@@ -127,11 +128,53 @@ public class TrackViewFragment extends ListFragment {
         args.putString("artistid", mArtistId);
         args.putString("trackid", track.id);
         showPlayer(args);
+        */
+        mCurrPos = position;
+        Bundle data = getTrackDataByOffset(0);
+        if(data != null) { showPlayer(data); }
+    }
+
+    public Bundle getTrackDataByOffset(int offset) {
+        int newPos = mCurrPos + offset;
+        if(0 <= newPos && newPos < datalist.size()) {
+            mCurrPos = newPos;
+            Track track = datalist.get(mCurrPos);
+            Bundle trackdata =  new Bundle();
+            trackdata.putString("artist", mArtistName);
+            trackdata.putString("album", track.album.name);
+            trackdata.putString("track", track.name);
+            trackdata.putString("trackurl", track.preview_url);
+            trackdata.putString("artistid", mArtistId);
+            trackdata.putString("trackid", track.id);
+            return trackdata;
+        } else {
+            return null;
+        }
     }
 
     public void showPlayer(Bundle trackdata) {
+        // TODO: IMPORTANT! show player as normal activity on phone (and as popup on tablet)
         DialogFragment player = new PlayerDialogFragment();
         player.setArguments(trackdata);
-        player.show(getActivity().getSupportFragmentManager(), this.FRAGMENT_NAME);
+        mIsLargeLayout = true;
+        if(mIsLargeLayout) {
+            // show fragment in modal window
+            player.show(getActivity().getSupportFragmentManager(), PlayerDialogFragment.FRAGMENT_NAME);
+        } else {
+            // show fragment fullscreen on smaller screens
+            FragmentManager fm = getActivity().getSupportFragmentManager();
+            fm.beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(android.R.id.content, player)
+                    .addToBackStack(PlayerDialogFragment.FRAGMENT_NAME)
+                    .commit();
+        }
+    }
+
+    public interface onTrackChangedListener {
+        // containing activity must implement this interface to allow
+        // player fragment to skip tracks back and forth
+        Bundle getPrevTrack();
+        Bundle getNextTrack();
     }
 }

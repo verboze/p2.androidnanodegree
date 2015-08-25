@@ -42,6 +42,11 @@ public class PlayerDialogFragment extends DialogFragment {
     private String mArtistId;
     private String mTrackId;
     private String mCurrTrack;
+
+    private TextView mTvArtistName;
+    private TextView mTvTrackTitle;
+    private TextView mTvAlbumTitle;
+
     boolean mBound = false;
     StreamerService mService;
 
@@ -100,22 +105,32 @@ public class PlayerDialogFragment extends DialogFragment {
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         final View playerView = inflater.inflate(R.layout.fragment_player, null);
-        ((TextView) playerView.findViewById(R.id.plyrArtistName)).setText(_mArtistName);
-        ((TextView) playerView.findViewById(R.id.plyrTrackTitle)).setText(_mTrackName);
-        ((TextView) playerView.findViewById(R.id.plyrAlbumTitle)).setText(_mAlbumName);
+        mTvArtistName = ((TextView) playerView.findViewById(R.id.plyrArtistName));
+        mTvTrackTitle = ((TextView) playerView.findViewById(R.id.plyrTrackTitle));
+        mTvAlbumTitle = ((TextView) playerView.findViewById(R.id.plyrAlbumTitle));
+        mTvArtistName.setText(_mArtistName);
+        mTvTrackTitle.setText(_mTrackName);
+        mTvTrackTitle.setText(_mAlbumName);
 
         // define listeners for the player buttons
         ((ToggleButton) playerView.findViewById(R.id.btnPayPause))
                 .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-                    if (isChecked) { mService.play(mCurrTrack);
-                    } else { mService.pause(); }
-                }
-        });
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (!mBound) {
+                            Log.d(LOG_TAG_APP, "service not bound!!");
+                            return;
+                        }
+                        if (isChecked) {
+                            mService.play(mCurrTrack);
+                        } else {
+                            mService.pause();
+                        }
+                    }
+                });
         playerView.findViewById(R.id.btnPayPause).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                // TODO: this background cannot be static
                 playerView.findViewById(R.id.btnPayPause).setBackgroundResource(R.drawable.ic_play_circle_filled_black_48dp);
                 if(mBound) { mService.stop(); }
                 else { Log.d(LOG_TAG_APP, "service not bound!!"); }
@@ -126,18 +141,30 @@ public class PlayerDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-                mCurrTrack = getPrevTrack();
-                mService.play(mCurrTrack);
+                Bundle trackdata = ((TrackActivity) getActivity()).getPrevTrack();
+                if(trackdata != null) {
+                    mCurrTrack = trackdata.getString(ARG_TRACKURL);
+                    mTvTrackTitle.setText(trackdata.getString(ARG_TRACK));
+                    mTvAlbumTitle.setText(trackdata.getString(ARG_ALBUM));
+                    mService.play(mCurrTrack);
+                }
             }
         });
         playerView.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-                mCurrTrack = getNextTrack();
-                mService.play(mCurrTrack);
+                Bundle trackdata = ((TrackActivity) getActivity()).getNextTrack();
+                if(trackdata != null) {
+                    mCurrTrack = trackdata.getString(ARG_TRACKURL);
+                    mTvTrackTitle.setText(trackdata.getString(ARG_TRACK));
+                    mTvAlbumTitle.setText(trackdata.getString(ARG_ALBUM));
+                    mService.play(mCurrTrack);
+                }
             }
         });
+        // TODO: IMPORTANT! implement seek bar
+        // TODO: IMPORTANT! implement elapsed time
 
         //build player UI
         builder.setView(playerView);
