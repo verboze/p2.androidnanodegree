@@ -10,7 +10,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class TrackActivity extends AppCompatActivity
-        implements TrackViewFragment.onTrackChangedListener {
+        implements PlayerDialogFragment.onTrackChangedListener {
+//    implements TrackViewFragment.onTrackChangedListener {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
 
     @Override
@@ -46,6 +47,20 @@ public class TrackActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public Bundle getCurrTrack() {
+        TrackViewFragment tv =
+                (TrackViewFragment) getSupportFragmentManager()
+                        .findFragmentByTag(TrackViewFragment.FRAGMENT_NAME);
+        if(tv != null) {
+            Bundle res = tv.getTrackDataByOffset(0);
+            if (res == null) Toast.makeText(this, "no tracks available to play", Toast.LENGTH_SHORT).show();
+            return res;
+        } else {
+            Log.d(LOG_TAG_APP, "could not retrieve fragment: " + TrackViewFragment.FRAGMENT_NAME);
+            return null;
+        }
     }
 
     public Bundle getPrevTrack() {

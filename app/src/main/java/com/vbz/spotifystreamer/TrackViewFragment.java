@@ -146,6 +146,7 @@ public class TrackViewFragment extends ListFragment {
             trackdata.putString("trackurl", track.preview_url);
             trackdata.putString("artistid", mArtistId);
             trackdata.putString("trackid", track.id);
+            trackdata.putString("albumart", track.album.images.get(0).url);
             return trackdata;
         } else {
             return null;
@@ -171,10 +172,12 @@ public class TrackViewFragment extends ListFragment {
         }
     }
 
+    /*
     public interface onTrackChangedListener {
         // containing activity must implement this interface to allow
         // player fragment to skip tracks back and forth
         Bundle getPrevTrack();
         Bundle getNextTrack();
     }
+    */
 }

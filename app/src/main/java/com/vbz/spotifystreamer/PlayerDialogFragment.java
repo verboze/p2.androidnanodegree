@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,14 +16,23 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.vbz.spotifystreamer.data.SpotifyCacheReader;
 import com.vbz.spotifystreamer.service.StreamerService;
 import com.vbz.spotifystreamer.service.StreamerService.StreamerBinder;
 
 public class PlayerDialogFragment extends DialogFragment {
+    public interface onTrackChangedListener {
+        // containing activity must implement this interface to allow
+        // player fragment to skip tracks back and forth
+        Bundle getPrevTrack();
+        Bundle getNextTrack();
+    }
+
     // TODO: handle fragment lifecycle (especially rotation cases)
     public static final String FRAGMENT_NAME = "SPOTPLAYER";
     private static final String LOG_TAG_APP  = "SPOTSTREAMER";
@@ -35,20 +45,29 @@ public class PlayerDialogFragment extends DialogFragment {
     private static final String ARG_TRACKID = "trackid";
     private static final String ARG_TRACKURL = "trackurl";
 
-    private String _mArtistName;
-    private String _mAlbumName;
-    private String _mTrackName;
+    private PlayerUtils mPlayerUtils = new PlayerUtils();
+    private Handler mTimeTracker = new Handler();
 
-    private String mArtistId;
-    private String mTrackId;
+    // current track info
     private String mCurrTrack;
 
+    // player controls and other UI elements
+    private ImageView mImgAlbumArt;
+    private ToggleButton mBtnPlayPause;
+    private ImageButton mBtnPrev;
+    private ImageButton mBtnNext;
+    private SeekBar mSbSeekBar;
     private TextView mTvArtistName;
     private TextView mTvTrackTitle;
     private TextView mTvAlbumTitle;
+    private TextView mTvElapsedTime;
+    private TextView mTvDuration;
 
+    // misc vars
+//    private int seekForwardTime = 5000; // in millisecs
+//    private int seekBackwardTime = 5000; // in millisecs
     boolean mBound = false;
-    StreamerService mService;
+    StreamerService mMusicPlayerService;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -57,7 +76,7 @@ public class PlayerDialogFragment extends DialogFragment {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             Log.d(LOG_TAG_APP, "serviceConnected binding service...");
             StreamerBinder binder = (StreamerBinder) service;
-            mService = binder.getService();
+            mMusicPlayerService = binder.getService();
             mBound = true;
         }
 
@@ -68,33 +87,42 @@ public class PlayerDialogFragment extends DialogFragment {
         }
     };
 
-    private String getPrevTrack() {
-        // TODO: read from cursor
-        return "https://p.scdn.co/mp3-preview/f7bf16ca988662cb1181f6b9a968992f98187b9c";
-    }
-
-    private String getNextTrack() {
-        // TODO: read from cursor
-        return "https://p.scdn.co/mp3-preview/dd7136085ecdaa8492a805b1b86814bc572252eb";
-    }
-
     public PlayerDialogFragment() {
         // Required empty public constructor
+    }
+
+    private Runnable updateTimer = new Runnable() {
+        @Override
+        public void run() {
+            long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
+            long duration =  mMusicPlayerService.getDuration();
+            String ellapsedsecs = mPlayerUtils.timeToString(elapsedmillisecs);
+            int progress = mPlayerUtils.getCurrentPercentage(elapsedmillisecs, duration);
+            Log.d(LOG_TAG_APP, "trying to update UI with ellapsed: "+ellapsedsecs+" progress: "+progress);
+
+            // update UI elements
+            mTvElapsedTime.setText(ellapsedsecs);
+            mSbSeekBar.setProgress(progress);
+
+            // post another update a second from now
+            mTimeTracker.postDelayed(this, 500);
+        }
+    };
+
+    private void startTimer() {
+        Log.d(LOG_TAG_APP, "updating timer...");
+        mTimeTracker.postDelayed(updateTimer, 500);
+    }
+
+    private void stopTimer() {
+        Log.d(LOG_TAG_APP, "stopping timer...");
+        mTimeTracker.removeCallbacks(updateTimer);
+        // TODO: must be called when track finishes playing (OnCompletionListener)
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            _mArtistName = getArguments().getString(ARG_ARTIST);
-            _mAlbumName = getArguments().getString(ARG_ALBUM);
-            _mTrackName = getArguments().getString(ARG_TRACK);
-            mArtistId = getArguments().getString(ARG_ARTISTID);
-            mTrackId = getArguments().getString(ARG_TRACKID);
-            mCurrTrack = getArguments().getString(ARG_TRACKURL);
-            Log.d(LOG_TAG_APP, "artist: " + _mArtistName + ", track: " + _mTrackName
-                  + ", album: " + _mAlbumName + ", artistid: " + mArtistId + ", trackid: " + mTrackId);
-        }
     }
 
     @Override
@@ -102,69 +130,102 @@ public class PlayerDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        // Inflate and set the layout for the dialog
+        // Inflate and set the layout for the dialog, retrieve UI views
         // Pass null as the parent view because its going in the dialog layout
         final View playerView = inflater.inflate(R.layout.fragment_player, null);
-        mTvArtistName = ((TextView) playerView.findViewById(R.id.plyrArtistName));
-        mTvTrackTitle = ((TextView) playerView.findViewById(R.id.plyrTrackTitle));
-        mTvAlbumTitle = ((TextView) playerView.findViewById(R.id.plyrAlbumTitle));
-        mTvArtistName.setText(_mArtistName);
-        mTvTrackTitle.setText(_mTrackName);
-        mTvTrackTitle.setText(_mAlbumName);
+        mImgAlbumArt   = (ImageView) playerView.findViewById(R.id.imgAlbumArt);
+        mTvArtistName  = (TextView) playerView.findViewById(R.id.plyrArtistName);
+        mTvTrackTitle  = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
+        mTvAlbumTitle  = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
+        mTvElapsedTime = (TextView) playerView.findViewById(R.id.elapsedTime);
+        mTvDuration    = (TextView) playerView.findViewById(R.id.duration);
+        mSbSeekBar     = (SeekBar) playerView.findViewById(R.id.musicSeekbar);
+        mBtnPlayPause  = (ToggleButton) playerView.findViewById(R.id.btnPayPause);
+        mBtnPrev       = (ImageButton) playerView.findViewById(R.id.btnPrev);
+        mBtnNext       = (ImageButton) playerView.findViewById(R.id.btnNext);
 
-        // define listeners for the player buttons
-        ((ToggleButton) playerView.findViewById(R.id.btnPayPause))
-                .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!mBound) {
-                            Log.d(LOG_TAG_APP, "service not bound!!");
-                            return;
-                        }
-                        if (isChecked) {
-                            mService.play(mCurrTrack);
-                        } else {
-                            mService.pause();
-                        }
+
+        // player control configuration
+        mBtnPlayPause.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!mBound) {
+                    Log.d(LOG_TAG_APP, "service not bound!!");
+                    return;
+                }
+                if (isChecked) {
+                    Bundle trackdata = ((TrackActivity) getActivity()).getCurrTrack();
+                    if(trackdata != null) {
+                        mCurrTrack = trackdata.getString(ARG_TRACKURL);
+                        mTvArtistName.setText(trackdata.getString(ARG_ARTIST));
+                        mTvTrackTitle.setText(trackdata.getString(ARG_TRACK));
+                        mTvAlbumTitle.setText(trackdata.getString(ARG_ALBUM));
+                        mMusicPlayerService.play(mCurrTrack);
+                        startTimer();
                     }
-                });
-        playerView.findViewById(R.id.btnPayPause).setOnLongClickListener(new View.OnLongClickListener() {
+                } else {
+                    stopTimer();
+                    mMusicPlayerService.pause();
+                }
+            }
+        });
+        mBtnPlayPause.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 // TODO: this background cannot be static
-                playerView.findViewById(R.id.btnPayPause).setBackgroundResource(R.drawable.ic_play_circle_filled_black_48dp);
-                if(mBound) { mService.stop(); }
-                else { Log.d(LOG_TAG_APP, "service not bound!!"); }
+                mBtnPlayPause.setBackgroundResource(R.drawable.ic_play_circle_filled_black_48dp);
+                if(mBound) {
+                    stopTimer();
+                    mMusicPlayerService.stop();
+                } else {
+                    Log.d(LOG_TAG_APP, "service not bound!!");
+                }
                 return true;
             }
         });
-        playerView.findViewById(R.id.btnPrev).setOnClickListener(new View.OnClickListener() {
+        mBtnPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
                 Bundle trackdata = ((TrackActivity) getActivity()).getPrevTrack();
                 if(trackdata != null) {
                     mCurrTrack = trackdata.getString(ARG_TRACKURL);
+                    mTvArtistName.setText(trackdata.getString(ARG_ARTIST));
                     mTvTrackTitle.setText(trackdata.getString(ARG_TRACK));
                     mTvAlbumTitle.setText(trackdata.getString(ARG_ALBUM));
-                    mService.play(mCurrTrack);
+                    mMusicPlayerService.play(mCurrTrack);
                 }
             }
         });
-        playerView.findViewById(R.id.btnNext).setOnClickListener(new View.OnClickListener() {
+        mBtnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
                 Bundle trackdata = ((TrackActivity) getActivity()).getNextTrack();
                 if(trackdata != null) {
                     mCurrTrack = trackdata.getString(ARG_TRACKURL);
+                    mTvArtistName.setText(trackdata.getString(ARG_ARTIST));
                     mTvTrackTitle.setText(trackdata.getString(ARG_TRACK));
                     mTvAlbumTitle.setText(trackdata.getString(ARG_ALBUM));
-                    mService.play(mCurrTrack);
+                    mMusicPlayerService.play(mCurrTrack);
                 }
             }
         });
-        // TODO: IMPORTANT! implement seek bar
-        // TODO: IMPORTANT! implement elapsed time
+        mSbSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChanged = 0;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                stopTimer();
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mMusicPlayerService.seekTo(progressChanged);
+                startTimer();
+            }
+        });
 
         //build player UI
         builder.setView(playerView);

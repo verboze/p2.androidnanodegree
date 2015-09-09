@@ -111,7 +111,7 @@
                 android:gravity="center"
                 android:layout_width="25dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/playbuttontoggle"
+                android:background="@drawable/playtogglebutton"
                 android:textOn=""
                 android:textOff=""
                 android:text="" />

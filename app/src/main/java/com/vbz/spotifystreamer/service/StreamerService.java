@@ -69,10 +69,28 @@ public class StreamerService extends Service
         mMediaPlayer.stop();
     }
 
+    public void seekTo(int percent) {
+        // we only allow seeking when media is playing
+        if(mPaused || mMediaPlayer.isPlaying()) {
+            int location = mMediaPlayer.getDuration() * percent / 100;
+            Log.d(LOG_TAG, "DURATION: " + mMediaPlayer.getDuration() + ", SEEKTO: " + percent + "%, LOCATION: " + location);
+            mMediaPlayer.seekTo(location);
+        }
+    }
+
+    public long getEllapsedTime() {
+        return mMediaPlayer.getCurrentPosition();
+    }
+
+    public long getDuration() {
+        return mMediaPlayer.getDuration();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer.setOnCompletionListener(??); // TODO: define completion listener (must be trackfragment?!?)
         mMediaPlayer.setOnErrorListener(this);
     }
 
