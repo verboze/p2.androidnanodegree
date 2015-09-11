@@ -31,8 +31,13 @@ public class TrackViewFragment extends ListFragment {
     public static final String FRAGMENT_NAME = "TRACKLIST";
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
-    private static final String PARAM_ARTISTID = "artistid";
-    private static final String PARAM_ARTISTNAME = "artistname";
+    public static final String PARAM_ARTIST = "artist";
+    public static final String PARAM_ALBUM = "album";
+    public static final String PARAM_TRACK = "track";
+    public static final String PARAM_TRACKURL = "trackurl";
+    public static final String PARAM_ARTISTID = "artistid";
+    public static final String PARAM_TRACKID = "trackid";
+    public static final String PARAM_ALBUMART = "albumart";
 
     private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
@@ -118,17 +123,6 @@ public class TrackViewFragment extends ListFragment {
     }
 
     @Override public void onListItemClick(ListView l, View v, int position, long id) {
-        /*
-        Track track = datalist.get(position);
-        Bundle args =  new Bundle();
-        args.putString("artist", mArtistName);
-        args.putString("album", track.album.name);
-        args.putString("track", track.name);
-        args.putString("trackurl", track.preview_url);
-        args.putString("artistid", mArtistId);
-        args.putString("trackid", track.id);
-        showPlayer(args);
-        */
         mCurrPos = position;
         Bundle data = getTrackDataByOffset(0);
         if(data != null) { showPlayer(data); }
@@ -140,13 +134,13 @@ public class TrackViewFragment extends ListFragment {
             mCurrPos = newPos;
             Track track = datalist.get(mCurrPos);
             Bundle trackdata =  new Bundle();
-            trackdata.putString("artist", mArtistName);
-            trackdata.putString("album", track.album.name);
-            trackdata.putString("track", track.name);
-            trackdata.putString("trackurl", track.preview_url);
-            trackdata.putString("artistid", mArtistId);
-            trackdata.putString("trackid", track.id);
-            trackdata.putString("albumart", track.album.images.get(0).url);
+            trackdata.putString(PARAM_ARTIST, mArtistName);
+            trackdata.putString(PARAM_ALBUM, track.album.name);
+            trackdata.putString(PARAM_TRACK, track.name);
+            trackdata.putString(PARAM_TRACKURL, track.preview_url);
+            trackdata.putString(PARAM_ARTISTID, mArtistId);
+            trackdata.putString(PARAM_TRACKID, track.id);
+            trackdata.putString(PARAM_ALBUMART, track.album.images.get(0).url);
             return trackdata;
         } else {
             return null;
@@ -171,13 +165,4 @@ public class TrackViewFragment extends ListFragment {
                     .commit();
         }
     }
-
-    /*
-    public interface onTrackChangedListener {
-        // containing activity must implement this interface to allow
-        // player fragment to skip tracks back and forth
-        Bundle getPrevTrack();
-        Bundle getNextTrack();
-    }
-    */
 }

@@ -4,8 +4,12 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
+
+import com.vbz.spotifystreamer.PlayerDialogFragment;
 
 import java.io.IOException;
 
@@ -20,6 +24,7 @@ public class StreamerService extends Service
     private final IBinder mBinder = new StreamerBinder();
     private MediaPlayer mMediaPlayer = null;
     private boolean mPaused = false;
+    private Handler uiHandler = null;
 
     /** iBinder interface to access this service */
     public class StreamerBinder extends Binder {
@@ -33,24 +38,29 @@ public class StreamerService extends Service
         super();
     }
 
+    public void setHandler(Handler handler) {
+        uiHandler = handler;
+    }
+
     public void play(String trackurl) {
+        // TODO: nice to have: show notification when music is playing?
         if(mPaused) {
             // if player is in a paused state, resume
             Log.d(LOG_TAG, "Action: resuming: " + ACTION_PLAY + " URL: " + trackurl);
             mPaused = false;
             mMediaPlayer.start();
+            uiHandler.sendEmptyMessage(PlayerDialogFragment.STARTTIMER);
             return;
         }
 
         try {
             // this is request for a new track, prepare the player and play
             Log.d(LOG_TAG, "Action: starting: " + ACTION_PLAY + " URL: " + trackurl);
+            uiHandler.sendEmptyMessage(PlayerDialogFragment.RESETELAPSED);
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(trackurl);
             mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.prepareAsync();
-//            mMediaPlayer.prepare();
-//            mMediaPlayer.start();
+            mMediaPlayer.prepareAsync(); // calls onPrepared() once ready, to begin playback
         } catch (IOException e) {
             Log.e(LOG_TAG, "unable to play track: " + trackurl);
         }
@@ -59,13 +69,20 @@ public class StreamerService extends Service
     public void pause() {
         Log.d(LOG_TAG, "Action: " + ACTION_PAUSE);
         if(mMediaPlayer.isPlaying()) {
+            uiHandler.sendEmptyMessage(PlayerDialogFragment.STOPTIMER);
             mMediaPlayer.pause();
             mPaused = true;
         }
     }
 
+    public boolean isPaused() {
+        return mPaused;
+    }
+
     public void stop() {
         Log.d(LOG_TAG, "Action: "+ ACTION_STOP);
+        mPaused = false;
+        uiHandler.sendEmptyMessage(PlayerDialogFragment.STOPTIMER);
         mMediaPlayer.stop();
     }
 
@@ -74,7 +91,9 @@ public class StreamerService extends Service
         if(mPaused || mMediaPlayer.isPlaying()) {
             int location = mMediaPlayer.getDuration() * percent / 100;
             Log.d(LOG_TAG, "DURATION: " + mMediaPlayer.getDuration() + ", SEEKTO: " + percent + "%, LOCATION: " + location);
+            uiHandler.sendEmptyMessage(PlayerDialogFragment.STOPTIMER);
             mMediaPlayer.seekTo(location);
+            uiHandler.sendEmptyMessage(PlayerDialogFragment.STARTTIMER);
         }
     }
 
@@ -86,11 +105,14 @@ public class StreamerService extends Service
         return mMediaPlayer.getDuration();
     }
 
+    public void setOnCompletionListener(MediaPlayer.OnCompletionListener listener) {
+        mMediaPlayer.setOnCompletionListener(listener);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
-//        mMediaPlayer.setOnCompletionListener(??); // TODO: define completion listener (must be trackfragment?!?)
         mMediaPlayer.setOnErrorListener(this);
     }
 
@@ -112,6 +134,8 @@ public class StreamerService extends Service
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        uiHandler.sendEmptyMessage(PlayerDialogFragment.SETDURATION);
+        uiHandler.sendEmptyMessage(PlayerDialogFragment.STARTTIMER);
     }
 
     @Override

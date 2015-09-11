@@ -16,7 +16,6 @@ import kaaes.spotify.webapi.android.models.Track;
 
 /* adapted from: http://www.perfectapk.com/android-listfragment-tutorial.html */
 public class TrackListViewAdapter extends ArrayAdapter<Track> {
-    // TODO: store retrieved data into content provider
     private static final String emptycoverurl = "http://static.tumblr.com/jn9hrij/20Ul2zzsr/albumart.jpg";
 
     public TrackListViewAdapter(Context context, List<Track> items) {
@@ -44,7 +43,6 @@ public class TrackListViewAdapter extends ArrayAdapter<Track> {
 
         // update the item view
         Track item = getItem(position);
-//        viewHolder.ivCover.setImageDrawable(item.cover);
         viewHolder.tvAlbum.setText(item.album.name);
         viewHolder.tvTrack.setText(item.name);
 
