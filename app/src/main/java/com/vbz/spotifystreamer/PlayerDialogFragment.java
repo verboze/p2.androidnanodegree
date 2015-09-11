@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -24,11 +25,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.vbz.spotifystreamer.service.StreamerService;
 import com.vbz.spotifystreamer.service.StreamerService.StreamerBinder;
+import com.vbz.spotifystreamer.utils.PlayerUtils;
 
 public class PlayerDialogFragment extends DialogFragment
     implements MediaPlayer.OnCompletionListener {
@@ -78,6 +78,7 @@ public class PlayerDialogFragment extends DialogFragment
 
     // misc vars
     boolean mBound = false;
+    long mDuration = 0;
     StreamerService mMusicPlayerService;
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -113,15 +114,12 @@ public class PlayerDialogFragment extends DialogFragment
 
     // Handler methods to update UI on music playback actions
     private Runnable updateTimer = new Runnable() {
+        // TODO: fix jittery progress update
         @Override
         public void run() {
-            long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
-            long duration =  mMusicPlayerService.getDuration();
-            String ellapsedsecs = mPlayerUtils.timeToString(elapsedmillisecs);
-            int progress = mPlayerUtils.getCurrentPercentage(elapsedmillisecs, duration);
-
             // update UI elements
-            mTvElapsedTime.setText(ellapsedsecs);
+            long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
+            int progress = mPlayerUtils.getCurrentPercentage(elapsedmillisecs, mDuration);
             mSbSeekBar.setProgress(progress);
 
             // post another update a second from now
@@ -145,9 +143,21 @@ public class PlayerDialogFragment extends DialogFragment
         mSbSeekBar.setProgress(0);
     }
 
+    private void setElapsedTime(int percent, long totalDuration) {
+        // TODO: fix jittery progress update
+        long elapsed =  mPlayerUtils.getElapsedFromPercentage(percent, totalDuration);
+        Log.d(LOG_TAG_APP, "percent:"+percent+", elapsed: "+elapsed+", total: "+totalDuration);
+        mTvElapsedTime.setText(mPlayerUtils.timeToString(elapsed)); // cheating a little bit...
+
+        /////////////////////////////////////////
+//        long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
+//        String ellapsedsecs = mPlayerUtils.timeToString(elapsedmillisecs);
+//        mTvElapsedTime.setText(ellapsedsecs);
+    }
+
     private void setDuration() {
-        long duration =  mMusicPlayerService.getDuration();
-        mTvDuration.setText(mPlayerUtils.timeToString(duration));
+        mDuration =  mMusicPlayerService.getDuration();
+        mTvDuration.setText(mPlayerUtils.timeToString(mDuration));
     }
 
     private void setTrackDetails(Bundle trackdata) {
@@ -215,93 +225,43 @@ public class PlayerDialogFragment extends DialogFragment
         }
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-
+    public View getPlayerView(LayoutInflater inflater, ViewGroup container) {
         // Inflate and set the layout for the dialog, retrieve UI views
-        // Pass null as the parent view because its going in the dialog layout
-        final View playerView = inflater.inflate(R.layout.fragment_player, null);
-        mImgAlbumArt   = (ImageView) playerView.findViewById(R.id.imgAlbumArt);
-        mTvArtistName  = (TextView) playerView.findViewById(R.id.plyrArtistName);
-        mTvTrackTitle  = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
-        mTvAlbumTitle  = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
+        final View playerView = inflater.inflate(R.layout.fragment_player, container);
+        mImgAlbumArt = (ImageView) playerView.findViewById(R.id.imgAlbumArt);
+        mTvArtistName = (TextView) playerView.findViewById(R.id.plyrArtistName);
+        mTvTrackTitle = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
+        mTvAlbumTitle = (TextView) playerView.findViewById(R.id.plyrAlbumTitle);
         mTvElapsedTime = (TextView) playerView.findViewById(R.id.elapsedTime);
-        mTvDuration    = (TextView) playerView.findViewById(R.id.duration);
-        mSbSeekBar     = (SeekBar) playerView.findViewById(R.id.musicSeekbar);
-        mBtnPlayPause  = (ToggleButton) playerView.findViewById(R.id.btnPayPause);
-        mBtnPrev       = (ImageButton) playerView.findViewById(R.id.btnPrev);
-        mBtnNext       = (ImageButton) playerView.findViewById(R.id.btnNext);
+        mTvDuration = (TextView) playerView.findViewById(R.id.duration);
+        mSbSeekBar = (SeekBar) playerView.findViewById(R.id.musicSeekbar);
+        mBtnPlayPause = (ToggleButton) playerView.findViewById(R.id.btnPayPause);
+        mBtnPrev = (ImageButton) playerView.findViewById(R.id.btnPrev);
+        mBtnNext = (ImageButton) playerView.findViewById(R.id.btnNext);
 
         // player control configuration
         mBtnPlayPause.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!mBound) {
-                    Log.d(LOG_TAG_APP, "service not bound!!");
-                    return;
-                }
-                if (isChecked) {
-                    Bundle trackdata = ((TrackActivity) getActivity()).getCurrTrack();
-                    if (trackdata != null) {
-                        setTrackDetails(trackdata);
-                        mMusicPlayerService.play(mCurrTrack);
-
-                    }
-                } else {
-                    mMusicPlayerService.pause();
-                }
+                playPauseAction();
             }
         });
         mBtnPlayPause.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (mBound) {
-                    resetElapsedTime();
-                    mBtnPlayPause.setChecked(false);
-                    mMusicPlayerService.stop();
-                } else {
-                    Log.d(LOG_TAG_APP, "service not bound!!");
-                }
+                stopAction();
                 return true;
             }
         });
         mBtnPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-                Bundle trackdata = ((TrackActivity) getActivity()).getPrevTrack();
-                if(trackdata != null) {
-                    setTrackDetails(trackdata);
-                    resetElapsedTime();
-                    mMusicPlayerService.stop(); // TODO: is this needed?
-                    mMusicPlayerService.play(mCurrTrack);
-                    mBtnPlayPause.setChecked(true);
-//                    if (! mMusicPlayerService.isPaused()) mMusicPlayerService.play(mCurrTrack);
-                }
+                prevAction();
             }
         });
         mBtnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mBound) {
-                    Log.d(LOG_TAG_APP, "service not bound!!");
-                    return;
-                }
-                Bundle trackdata = ((TrackActivity) getActivity()).getNextTrack();
-                if (trackdata != null) {
-                    setTrackDetails(trackdata);
-                    resetElapsedTime();
-                    mMusicPlayerService.stop(); // TODO: is this needed?
-                    mMusicPlayerService.play(mCurrTrack);
-                    mBtnPlayPause.setChecked(true);
-//                    if (! mMusicPlayerService.isPaused()) mMusicPlayerService.play(mCurrTrack);
-                }
+                nextAction();
             }
         });
         mSbSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -309,6 +269,7 @@ public class PlayerDialogFragment extends DialogFragment
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 progressChanged = progress;
+                setElapsedTime(progressChanged, mDuration);
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -320,7 +281,28 @@ public class PlayerDialogFragment extends DialogFragment
             }
         });
 
+        return playerView;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+//        return getPlayerView(inflater, container);
+        return getPlayerView(inflater, null);
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         //build player UI
+//        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View playerView = getPlayerView(inflater, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(playerView);
         Dialog popupPlayer = builder.create();
 

@@ -90,10 +90,9 @@ public class StreamerService extends Service
         // we only allow seeking when media is playing
         if(mPaused || mMediaPlayer.isPlaying()) {
             int location = mMediaPlayer.getDuration() * percent / 100;
-            Log.d(LOG_TAG, "DURATION: " + mMediaPlayer.getDuration() + ", SEEKTO: " + percent + "%, LOCATION: " + location);
-            uiHandler.sendEmptyMessage(PlayerDialogFragment.STOPTIMER);
             mMediaPlayer.seekTo(location);
             uiHandler.sendEmptyMessage(PlayerDialogFragment.STARTTIMER);
+//            Log.d(LOG_TAG, "DURATION: " + mMediaPlayer.getDuration() + ", SEEKTO: " + percent + "%, LOCATION: " + location);
         }
     }
 

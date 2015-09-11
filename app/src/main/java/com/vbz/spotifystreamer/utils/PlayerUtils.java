@@ -1,4 +1,4 @@
-package com.vbz.spotifystreamer;
+package com.vbz.spotifystreamer.utils;
 
 public class PlayerUtils {
     public String timeToString(long millisecs) {
@@ -16,5 +16,9 @@ public class PlayerUtils {
         Double percentage = (((double)currentSecs) / totalSecs) * 100;
 
         return percentage.intValue();
+    }
+
+    public long getElapsedFromPercentage(int percent, long totalDuration) {
+        return (long) (((double) percent) / 100 * totalDuration);
     }
 }

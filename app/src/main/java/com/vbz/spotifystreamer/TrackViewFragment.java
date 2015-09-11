@@ -151,7 +151,8 @@ public class TrackViewFragment extends ListFragment {
         // TODO: IMPORTANT! show player as normal activity on phone (and as popup on tablet)
         DialogFragment player = new PlayerDialogFragment();
         player.setArguments(trackdata);
-        mIsLargeLayout = true;
+        // TODO: set this variable based on screen size
+        mIsLargeLayout = false;
         if(mIsLargeLayout) {
             // show fragment in modal window
             player.show(getActivity().getSupportFragmentManager(), PlayerDialogFragment.FRAGMENT_NAME);
