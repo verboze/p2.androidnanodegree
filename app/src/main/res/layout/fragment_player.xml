@@ -1,137 +1,111 @@
 <!-- TODO: move string resources to string.xml -->
 <!-- TODO: fix stretching of image buttons -->
-<android.support.v7.widget.CardView
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/music_player"
-    android:layout_gravity="bottom|center"
+    android:orientation="vertical"
+    android:layout_gravity="top|center"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    card_view:cardCornerRadius="4dp">
-    <RelativeLayout
+    android:layout_height="match_parent">
+     <!--track info: artist name, album name -->
+    <TextView
+        android:id="@+id/plyrArtistName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <!-- album art -->
-        <ImageView
-            android:id="@+id/imgAlbumArt"
-            android:layout_margin="8dip"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@android:color/holo_green_dark" />
-        <!-- track info: artist name, track title, album name -->
-        <TextView
-            android:id="@+id/plyrArtistName"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold"
-            android:text="Artist Name"
-            android:maxLines="1"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/imgAlbumArt"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="8dip" />
-        <TextView
-            android:id="@+id/plyrTrackTitle"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Track Name"
-            android:maxLines="1"
-            android:layout_below="@+id/plyrArtistName"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/plyrArtistName"
-            android:layout_alignStart="@+id/plyrArtistName" />
-        <TextView
-            android:id="@+id/plyrAlbumTitle"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:text="Album Name"
-            android:maxLines="1"
-            android:layout_below="@+id/plyrTrackTitle"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/plyrTrackTitle"
-            android:layout_alignStart="@+id/plyrTrackTitle" />
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
+        android:text="Artist Name"
+        android:maxLines="1"
+        android:layout_marginTop="8dip" />
+    <TextView
+        android:id="@+id/plyrAlbumTitle"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:gravity="center"
+        android:text="Album Name"
+        android:maxLines="1" />
+    <!-- album art -->
+    <ImageView
+        android:id="@+id/imgAlbumArt"
+        android:layout_width="fill_parent"
+        android:layout_height="300dp"
+        android:src="@android:color/holo_green_dark"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp" />
+    <!-- track info: track title -->
+    <TextView
+        android:id="@+id/plyrTrackTitle"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Track Name"
+        android:maxLines="1" />
 
-        <!-- player control buttons -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+    <!-- seekbar/time display -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="4"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp">
+        <TextView
+            android:id="@+id/elapsedTime"
+            android:text="--:--"
+            android:layout_height="25dp"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp" />
+        <SeekBar
+            android:id="@+id/musicSeekbar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:weightSum="4"
-            android:layout_alignBottom="@+id/imgAlbumArt"
-            android:layout_alignLeft="@+id/plyrAlbumTitle"
-            android:layout_toEndOf="@+id/imgAlbumArt">
-            <ImageButton
-                android:id="@+id/btnPrev"
-                android:layout_width="0dip"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_skip_previous_black_48dp" />
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="2sp" />
-            <ToggleButton
-                android:id="@+id/btnPayPause"
-                android:layout_width="0dip"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:background="@drawable/playtogglebutton"
-                android:textOn=""
-                android:textOff=""
-                android:text=""
-                android:layout_marginLeft="0dp"
-                android:layout_marginRight="0dp" />
-            <Space
-                android:layout_width="5dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="2sp" />
-            <ImageButton
-                android:id="@+id/btnNext"
-                android:layout_width="0dip"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_skip_next_black_48dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:layout_weight="3.80"
+            android:layout_marginLeft="5dp" />
+        <TextView
+            android:id="@+id/duration"
+            android:text="--:--"
+            android:layout_height="25dp"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp" />
+    </LinearLayout>
 
-        <!-- seekbar/time display -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
+    <!-- player control buttons -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:weightSum="5">
+        <ImageButton
+            android:id="@+id/btnPrev"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
             android:layout_height="wrap_content"
-            android:weightSum="4"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_below="@+id/imgAlbumArt"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
-            <TextView
-                android:id="@+id/elapsedTime"
-                android:text="--:--"
-                android:layout_height="25dp"
-                android:layout_width="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginTop="5dp" />
-            <SeekBar
-                android:id="@+id/musicSeekbar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.80"
-                android:layout_marginLeft="5dp" />
-            <TextView
-                android:id="@+id/duration"
-                android:text="--:--"
-                android:layout_height="25dp"
-                android:layout_width="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginTop="5dp" />
-        </LinearLayout>
-    </RelativeLayout>
-</android.support.v7.widget.CardView>
+            android:src="@drawable/ic_skip_previous_black_48dp" />
+        <ToggleButton
+            android:id="@+id/btnPayPause"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:background="@drawable/playtogglebutton"
+            android:textOn=""
+            android:textOff=""
+            android:text=""
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp" />
+        <ImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_skip_next_black_48dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

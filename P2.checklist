@@ -5,8 +5,8 @@ User Interface - Layout
 [x] Individual artist result layout contains - Artist Thumbnail , Artist name
 [x] [Phone] UI contains a screen for displaying the top tracks for a selected artist
 [x] Individual track layout contains - Album art thumbnail, track name , album name
-[-] [Phone] UI contains a screen that represents the player. It contains track info (e.g., track duration, elapsed time, artist name, album name, album artwork, and track name). It also contains playback controls (e.g., play/pause/previous track/next track buttons and scrub bar) for the currently selected track.
-[-] Tablet UI uses a Master-Detail layout implemented using fragments. The left fragment is for searching artists and the right fragment is for displaying top tracks of a selected artist. The Now Playing controls are displayed in a DialogFragment.
+[x] [Phone] UI contains a screen that represents the player. It contains track info (e.g., track duration, elapsed time, artist name, album name, album artwork, and track name). It also contains playback controls (e.g., play/pause/previous track/next track buttons and scrub bar) for the currently selected track.
+[x] Tablet UI uses a Master-Detail layout implemented using fragments. The left fragment is for searching artists and the right fragment is for displaying top tracks of a selected artist. The Now Playing controls are displayed in a DialogFragment.
 
 ------------------------------------------------------
 User Interface - Function
@@ -17,6 +17,8 @@ User Interface - Function
 [x] When an artist is selected, app launches the "Top Tracks" View
 [x] App displays a list of top tracks
 [x] When a track is selected, the app displays the Now Playing screen and starts playing the track.
+(-) fix: rotation issues (when starting mainactivity in landscape mode, and when switching player from/to landscape mode)
+(-) fix: music playback should not restart on rotation
 
 ------------------------------------------------------
 Network API Implementation
@@ -41,6 +43,7 @@ Media Playback
 ------------------------------------------------------
 User Interface - Function
 ------------------------------------------------------
+(-) polish popup player
 [-] App displays a "Now Playing" Button in the ActionBar that serves to reopen the player UI should the user navigate back to browse content and then want to resume control over playback.
 
 ------------------------------------------------------

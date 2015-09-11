@@ -32,9 +32,11 @@ import com.vbz.spotifystreamer.utils.PlayerUtils;
 
 public class PlayerDialogFragment extends DialogFragment
     implements MediaPlayer.OnCompletionListener {
+
     public interface onTrackChangedListener {
         // containing activity must implement this interface to allow
-        // player fragment to skip tracks back and forth
+        // player fragment to navigate tracks
+        Bundle getCurrTrack();
         Bundle getPrevTrack();
         Bundle getNextTrack();
     }
@@ -62,6 +64,7 @@ public class PlayerDialogFragment extends DialogFragment
     };
 
     private PlayerUtils mPlayerUtils = new PlayerUtils();
+    private boolean mIsLargeScreen = false;
     private String mCurrTrack;
 
     // player controls and other UI elements
@@ -93,7 +96,7 @@ public class PlayerDialogFragment extends DialogFragment
             mMusicPlayerService.setOnCompletionListener((MediaPlayer.OnCompletionListener) PlayerDialogFragment.this);
             mBound = true;
 
-            Bundle trackdata = ((TrackActivity) getActivity()).getCurrTrack();
+            Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
             if (trackdata != null) {
                 setTrackDetails(trackdata);
                 mMusicPlayerService.play(mCurrTrack);
@@ -115,9 +118,9 @@ public class PlayerDialogFragment extends DialogFragment
     // Handler methods to update UI on music playback actions
     private Runnable updateTimer = new Runnable() {
         // TODO: fix jittery progress update
-        @Override
-        public void run() {
+        @Override public void run() {
             // update UI elements
+            //TODO: fix jittery seekbar/elapsedtime updates
             long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
             int progress = mPlayerUtils.getCurrentPercentage(elapsedmillisecs, mDuration);
             mSbSeekBar.setProgress(progress);
@@ -167,7 +170,7 @@ public class PlayerDialogFragment extends DialogFragment
         mTvAlbumTitle.setText(trackdata.getString(TrackViewFragment.PARAM_ALBUM));
         Picasso.with(getActivity())
                 .load(trackdata.getString(TrackViewFragment.PARAM_ALBUMART))
-                .resize(100, 100)
+                .resize(300, 300)
                 .into(mImgAlbumArt);
     }
 
@@ -177,7 +180,7 @@ public class PlayerDialogFragment extends DialogFragment
             return;
         }
         if (mBtnPlayPause.isChecked()) {
-            Bundle trackdata = ((TrackActivity) getActivity()).getCurrTrack();
+            Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
             if (trackdata != null) {
                 setTrackDetails(trackdata);
                 mMusicPlayerService.play(mCurrTrack);
@@ -191,7 +194,7 @@ public class PlayerDialogFragment extends DialogFragment
 
     private void prevAction() {
         if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-        Bundle trackdata = ((TrackActivity) getActivity()).getPrevTrack();
+        Bundle trackdata = ((onTrackChangedListener) getActivity()).getPrevTrack();
         if(trackdata != null) {
             setTrackDetails(trackdata);
             resetElapsedTime();
@@ -204,7 +207,7 @@ public class PlayerDialogFragment extends DialogFragment
 
     private void nextAction() {
         if (!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
-        Bundle trackdata = ((TrackActivity) getActivity()).getNextTrack();
+        Bundle trackdata = ((onTrackChangedListener) getActivity()).getNextTrack();
         if (trackdata != null) {
             setTrackDetails(trackdata);
             resetElapsedTime();
@@ -225,9 +228,21 @@ public class PlayerDialogFragment extends DialogFragment
         }
     }
 
-    public View getPlayerView(LayoutInflater inflater, ViewGroup container) {
-        // Inflate and set the layout for the dialog, retrieve UI views
-        final View playerView = inflater.inflate(R.layout.fragment_player, container);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // TODO: important: fix layout and playback on screen rotate
+        super.onCreate(savedInstanceState);
+        mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
+        Log.d(LOG_TAG_APP, "ISLARGSCREEN: "+mIsLargeScreen);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate and set the layout for the dialog, retrieve UI elements
+        int layout = 0;
+        if (mIsLargeScreen) { Log.d(LOG_TAG_APP, "loading overlay player"); layout = R.layout.fragment_overlay_player; }
+        else { Log.d(LOG_TAG_APP, "loading full player"); layout = R.layout.fragment_full_player; }
+        final View playerView = inflater.inflate(layout, null);
         mImgAlbumArt = (ImageView) playerView.findViewById(R.id.imgAlbumArt);
         mTvArtistName = (TextView) playerView.findViewById(R.id.plyrArtistName);
         mTvTrackTitle = (TextView) playerView.findViewById(R.id.plyrTrackTitle);
@@ -281,44 +296,26 @@ public class PlayerDialogFragment extends DialogFragment
             }
         });
 
+        // if on a large screen, display dialog in modal fashion
+        if(mIsLargeScreen) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setView(playerView);
+            Dialog popupPlayer = builder.create();
+
+            // align modal player window to bottom of screen
+            Window win = popupPlayer.getWindow();
+            WindowManager.LayoutParams wlp = win.getAttributes();
+            wlp.gravity = Gravity.BOTTOM;
+        }
+
         return playerView;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        return getPlayerView(inflater, container);
-        return getPlayerView(inflater, null);
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        //build player UI
-//        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View playerView = getPlayerView(inflater, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(playerView);
-        Dialog popupPlayer = builder.create();
-
-        // align modal player window to bottom of screen
-        Window win = popupPlayer.getWindow();
-        WindowManager.LayoutParams wlp = win.getAttributes();
-        wlp.gravity = Gravity.BOTTOM;
-
-        return popupPlayer;
     }
 
     @Override
     public void onStart() {
         super.onStart();
         // bind streamer service to enable playback on track click
-        Log.d(LOG_TAG_APP, "starting player. should be binding here...");
+        Log.d(LOG_TAG_APP, "binding player...");
         Intent intent = new Intent(getActivity(), StreamerService.class);
         getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
     }
@@ -337,7 +334,7 @@ public class PlayerDialogFragment extends DialogFragment
         if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
         mBtnPlayPause.setChecked(false);
         stopElapsedTimer(); // kill timer for previous track
-        Bundle trackdata = ((TrackActivity) getActivity()).getNextTrack();
+        Bundle trackdata = ((onTrackChangedListener) getActivity()).getNextTrack();
         if(trackdata != null) {
             setTrackDetails(trackdata);
             mMusicPlayerService.play(mCurrTrack);

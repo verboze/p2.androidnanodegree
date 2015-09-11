@@ -39,13 +39,13 @@ public class TrackViewFragment extends ListFragment {
     public static final String PARAM_TRACKID = "trackid";
     public static final String PARAM_ALBUMART = "albumart";
 
+    private boolean mIsLargeScreen = false;
     private List<Track> datalist; // holds data retrieved from API
     private SpotifyService spotifysvc = new SpotifyApi().getService();
     private boolean was_data_fetched = false;
     private String mArtistName = null;
     private String mArtistId = null;
     private Cursor mCursor = null;
-    private boolean mIsLargeLayout = false;
     private int mCurrPos = 0;
 
     // TODO: handle fragment lifecycle (especially rotation cases)
@@ -100,6 +100,8 @@ public class TrackViewFragment extends ListFragment {
         } else {
             datalist = new ArrayList<>();
         }
+
+        mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -148,16 +150,13 @@ public class TrackViewFragment extends ListFragment {
     }
 
     public void showPlayer(Bundle trackdata) {
-        // TODO: IMPORTANT! show player as normal activity on phone (and as popup on tablet)
         DialogFragment player = new PlayerDialogFragment();
         player.setArguments(trackdata);
-        // TODO: set this variable based on screen size
-        mIsLargeLayout = false;
-        if(mIsLargeLayout) {
+        if(mIsLargeScreen) {
             // show fragment in modal window
             player.show(getActivity().getSupportFragmentManager(), PlayerDialogFragment.FRAGMENT_NAME);
         } else {
-            // show fragment fullscreen on smaller screens
+            // show fragment fullscreen on smaller devices
             FragmentManager fm = getActivity().getSupportFragmentManager();
             fm.beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
