@@ -7,6 +7,7 @@ User Interface - Layout
 [x] Individual track layout contains - Album art thumbnail, track name , album name
 [x] [Phone] UI contains a screen that represents the player. It contains track info (e.g., track duration, elapsed time, artist name, album name, album artwork, and track name). It also contains playback controls (e.g., play/pause/previous track/next track buttons and scrub bar) for the currently selected track.
 [x] Tablet UI uses a Master-Detail layout implemented using fragments. The left fragment is for searching artists and the right fragment is for displaying top tracks of a selected artist. The Now Playing controls are displayed in a DialogFragment.
+(x) update strings resource
 
 ------------------------------------------------------
 User Interface - Function
@@ -17,10 +18,9 @@ User Interface - Function
 [x] When an artist is selected, app launches the "Top Tracks" View
 [x] App displays a list of top tracks
 [x] When a track is selected, the app displays the Now Playing screen and starts playing the track.
-(/) load artist/track fragments in same activity
+(x) load artist/track fragments in same activity
 (x) fix: rotation issues ([x]starting mainactivity in landscape mode, [x]switching player from/to landscape mode)
-(-) fix: music playback should not restart on rotation
-(-) remove: [X]trackactivity, [x]data.*, [x]utils.mockdata, [x]androidtest.data.testdb, [x]activity_tracks.xml, [-]fragment_player.*,  
+(x) remove: (x)trackactivity, (x)data.*, [x]utils.mockdata, (x)androidtest.data.testdb, (x)activity_tracks.xml, (x)fragment_player.*,  
 
 ------------------------------------------------------
 Network API Implementation
@@ -38,15 +38,15 @@ Media Playback
 [x] Play button starts/resumes playback of currently selected track
 [x] Pause button pauses playback of currently selected track
 [x] If a user taps on another track while one is currently playing, playback is stopped on the currently playing track and the newly selected track (in other words, the tracks should not mix)
-[/] Scrub bar displays the current playback position in time and is scrubbable. Scrubbing changes the track position appropriately.
+[x] Scrub bar displays the current playback position in time and is scrubbable. Scrubbing changes the track position appropriately.
 
 
 ============= NICE TO HAVE ===========================
 ------------------------------------------------------
 User Interface - Function
 ------------------------------------------------------
-(-) polish popup player
-(-) [x] dualpane in landscape mode on phone, [-]rotation from tracks activity landscape to portrait
+(-) polish popup player: (-) scrubber time update should be smoother (-) music playback should not restart on rotation
+(-) rotation improvements: (/) dualpane in landscape mode on phone, (-)rotation from tracks activity landscape to portrait
 [-] App displays a "Now Playing" Button in the ActionBar that serves to reopen the player UI should the user navigate back to browse content and then want to resume control over playback.
 
 ------------------------------------------------------

@@ -7,4 +7,12 @@
     <string name="search_activity">Artist Search</string>
     <string name="action_settings">Settings</string>
     <string name="empty_list_text">use the search menu button to lookup artists</string>
+
+    <!-- player strings -->
+    <string name="artist_label">Artist Name</string>
+    <string name="album_label">Album Name</string>
+    <string name="track_label">Track Name</string>
+    <string name="elapsedtime_label">--:--</string>
+    <string name="duration_label">--:--</string>
+
 </resources>
