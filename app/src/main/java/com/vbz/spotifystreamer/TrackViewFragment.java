@@ -153,10 +153,10 @@ public class TrackViewFragment extends ListFragment {
             // show fragment fullscreen on smaller devices
             FragmentManager fm = getActivity().getSupportFragmentManager();
             fm.beginTransaction()
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(android.R.id.content, player)
-                    .addToBackStack(PlayerDialogFragment.FRAGMENT_NAME)
-                    .commit();
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(android.R.id.content, player)
+                .addToBackStack(PlayerDialogFragment.FRAGMENT_NAME)
+                .commit();
         }
     }
 }
