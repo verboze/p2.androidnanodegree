@@ -2,6 +2,7 @@ package com.vbz.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -17,12 +18,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // TODO: instead of checking for other pane, check for wide screen?
         if(findViewById(R.id.tracks_fragment_container) != null) {
             mTwoPanes = true;
             if (savedInstanceState == null) {
+                TrackViewFragment tvf = new TrackViewFragment();
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.tracks_fragment_container, new TrackViewFragment())
-                        .commit();
+                    .add(R.id.tracks_fragment_container, tvf, TrackViewFragment.FRAGMENT_NAME)
+                    .commit();
             }
         }
     }
@@ -44,15 +47,13 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.tracks_fragment_container, tvf, TrackViewFragment.FRAGMENT_NAME)
                     .commit();
         } else {
-            Intent detailsIntent = new Intent(this, TrackActivity.class);
-            detailsIntent.putExtra("artistname", data.getString("artistname"));
-            detailsIntent.putExtra("artistid", data.getString("artistid"));
-
-            if (detailsIntent.resolveActivity(this.getPackageManager()) != null) {
-                startActivity(detailsIntent);
-            } else {
-                Toast.makeText(this, "could not find TackActivity", Toast.LENGTH_SHORT).show();
-            }
+            // TODO: why is the loaded fragment not taking full width of parent?!?
+            TrackViewFragment tvf = new TrackViewFragment();
+            tvf.setArguments(data);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.artist_list_fragment, tvf, TrackViewFragment.FRAGMENT_NAME)
+                    .addToBackStack(TrackViewFragment.FRAGMENT_NAME)
+                    .commit();
         }
     }
 

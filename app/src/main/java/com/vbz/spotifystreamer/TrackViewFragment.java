@@ -48,10 +48,8 @@ public class TrackViewFragment extends ListFragment {
     private Cursor mCursor = null;
     private int mCurrPos = 0;
 
-    // TODO: handle fragment lifecycle (especially rotation cases)
-
     public TrackViewFragment() {
-
+        // required empty constructor
     }
 
     private void fetchTracks(String artistid) {

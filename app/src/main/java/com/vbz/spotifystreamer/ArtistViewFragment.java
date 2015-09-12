@@ -31,14 +31,13 @@ import retrofit.client.Response;
 public class ArtistViewFragment extends ListFragment {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
+    public static final String FRAGMENT_NAME = "ARTISTLIST";
     private List<Artist> mDatalist; // holds data retrieved from API
     private SpotifyService mSpotifysvc = new SpotifyApi().getService();
 
     public ArtistViewFragment() {
 
     }
-
-    // TODO: handle fragment lifecycle (especially rotation cases)
 
     private void search(String query) {
         // TODO: make it a bit more user friendly, show spinners while loading, etc
@@ -137,7 +136,6 @@ public class ArtistViewFragment extends ListFragment {
         data.putString("artistid", item.id);
         SelectionCallback clickAction = (SelectionCallback) getActivity();
         clickAction.onItemSelected(data);
-
 
         /*
         Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);

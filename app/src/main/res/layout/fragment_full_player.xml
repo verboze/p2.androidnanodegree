@@ -7,6 +7,7 @@
     android:layout_gravity="top|center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
     card_view:cardCornerRadius="4dp">
     <LinearLayout
         android:orientation="vertical"

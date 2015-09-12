@@ -41,7 +41,6 @@ public class PlayerDialogFragment extends DialogFragment
         Bundle getNextTrack();
     }
 
-    // TODO: handle fragment lifecycle (especially rotation cases)
     public static final String FRAGMENT_NAME = "SPOTPLAYER";
     private static final String LOG_TAG_APP  = "SPOTSTREAMER";
     private static final String LOG_TAG_FRAG = "SPOTPLAYER";
@@ -120,7 +119,6 @@ public class PlayerDialogFragment extends DialogFragment
         // TODO: fix jittery progress update
         @Override public void run() {
             // update UI elements
-            //TODO: fix jittery seekbar/elapsedtime updates
             long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
             int progress = mPlayerUtils.getCurrentPercentage(elapsedmillisecs, mDuration);
             mSbSeekBar.setProgress(progress);
@@ -198,7 +196,7 @@ public class PlayerDialogFragment extends DialogFragment
         if(trackdata != null) {
             setTrackDetails(trackdata);
             resetElapsedTime();
-            mMusicPlayerService.stop(); // TODO: is this needed?
+            mMusicPlayerService.stop();
             mMusicPlayerService.play(mCurrTrack);
             mBtnPlayPause.setChecked(true);
         }
@@ -211,7 +209,7 @@ public class PlayerDialogFragment extends DialogFragment
         if (trackdata != null) {
             setTrackDetails(trackdata);
             resetElapsedTime();
-            mMusicPlayerService.stop(); // TODO: is this needed?
+            mMusicPlayerService.stop();
             mMusicPlayerService.play(mCurrTrack);
             mBtnPlayPause.setChecked(true);
         }
@@ -230,7 +228,6 @@ public class PlayerDialogFragment extends DialogFragment
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // TODO: important: fix layout and playback on screen rotate
         super.onCreate(savedInstanceState);
         mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
         Log.d(LOG_TAG_APP, "ISLARGSCREEN: "+mIsLargeScreen);

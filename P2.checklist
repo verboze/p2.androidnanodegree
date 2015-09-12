@@ -17,8 +17,10 @@ User Interface - Function
 [x] When an artist is selected, app launches the "Top Tracks" View
 [x] App displays a list of top tracks
 [x] When a track is selected, the app displays the Now Playing screen and starts playing the track.
+(-) load artist/track fragments in same activity
 (-) fix: rotation issues (when starting mainactivity in landscape mode, and when switching player from/to landscape mode)
 (-) fix: music playback should not restart on rotation
+(-) remove: trackactivity, data.*, utils.mockdata, androidtest.data.testdb, activity_tracks.xml, fragment_player.*,  
 
 ------------------------------------------------------
 Network API Implementation
