@@ -72,6 +72,7 @@ public class ArtistViewFragment extends ListFragment {
             mDatalist.add(i);
         }
         setListAdapter(new ArtistListViewAdapter(getActivity(), mDatalist));
+        ((MainActivity)getActivity()).clearTrackList();
     }
 
     @Override public void onCreate(Bundle savedinstanceSate) {
@@ -113,7 +114,6 @@ public class ArtistViewFragment extends ListFragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-//                Log.d(LOG_TAG_APP, "listening for... " + newText);
                 return true;
             }
         });
@@ -136,19 +136,6 @@ public class ArtistViewFragment extends ListFragment {
         data.putString("artistid", item.id);
         SelectionCallback clickAction = (SelectionCallback) getActivity();
         clickAction.onItemSelected(data);
-
-        /*
-        Intent detailsIntent = new Intent(getActivity(), TrackActivity.class);
-        detailsIntent.putExtra("artistname", item.name);
-        detailsIntent.putExtra("artistid", item.id);
-        Log.d(LOG_TAG_APP, "artistname: "+item.name + ", artistid: "+item.id);
-        if (detailsIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivity(detailsIntent);
-        }
-        else {
-            Toast.makeText(getActivity(), "could not find TackActivity", Toast.LENGTH_SHORT).show();
-        }
-        */
     }
 
     @Override public void onSaveInstanceState(Bundle savedInstanceState) {

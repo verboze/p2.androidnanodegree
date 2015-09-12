@@ -92,18 +92,14 @@ public class TrackViewFragment extends ListFragment {
     @Override public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
         setRetainInstance(true);
-        if (savedinstanceSate != null) {
-            // restore layout
-            Log.d(LOG_TAG_APP, "restoring instance...?");
-        } else {
-            datalist = new ArrayList<>();
-        }
-
+        if (savedinstanceSate == null) { datalist = new ArrayList<>(); }
         mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
+        if(args == null) { return null; }
+
         mArtistName = args.getString("artistname");
         mArtistId = args.getString("artistid");
 

@@ -1,9 +1,8 @@
 <!-- TODO: remove context? -->
-<fragment
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/artist_list_fragment"
-    android:name="com.vbz.spotifystreamer.ArtistViewFragment"
+    android:id="@+id/main_list_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_weight="2"
