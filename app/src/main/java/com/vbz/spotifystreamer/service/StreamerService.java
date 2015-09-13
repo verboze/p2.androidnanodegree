@@ -6,7 +6,6 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 import com.vbz.spotifystreamer.PlayerDialogFragment;
@@ -75,6 +74,10 @@ public class StreamerService extends Service
         }
     }
 
+    public boolean isPlaying() {
+        return mMediaPlayer.isPlaying();
+    }
+
     public boolean isPaused() {
         return mPaused;
     }
@@ -110,6 +113,7 @@ public class StreamerService extends Service
 
     @Override
     public void onCreate() {
+        Log.d(LOG_TAG, "(re)creating media player");
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnErrorListener(this);

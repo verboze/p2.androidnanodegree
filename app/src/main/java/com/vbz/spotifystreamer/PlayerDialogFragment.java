@@ -1,5 +1,7 @@
 package com.vbz.spotifystreamer;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -79,7 +81,8 @@ public class PlayerDialogFragment extends DialogFragment
     private TextView mTvDuration;
 
     // misc vars
-    boolean mBound = false;
+    Application mAppctx = null;
+    boolean mServiceBound = false;
     long mDuration = 0;
     StreamerService mMusicPlayerService;
 
@@ -93,7 +96,7 @@ public class PlayerDialogFragment extends DialogFragment
             mMusicPlayerService = binder.getService();
             mMusicPlayerService.setHandler(mPlaybackUIHandler);
             mMusicPlayerService.setOnCompletionListener((MediaPlayer.OnCompletionListener) PlayerDialogFragment.this);
-            mBound = true;
+            mServiceBound = true;
 
             Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
             if (trackdata != null) {
@@ -106,7 +109,7 @@ public class PlayerDialogFragment extends DialogFragment
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.d(LOG_TAG_APP, "disconnecting service...");
-            mBound = false;
+            mServiceBound = false;
         }
     };
 
@@ -147,13 +150,8 @@ public class PlayerDialogFragment extends DialogFragment
     private void setElapsedTime(int percent, long totalDuration) {
         // TODO: fix jittery progress update
         long elapsed =  mPlayerUtils.getElapsedFromPercentage(percent, totalDuration);
-        Log.d(LOG_TAG_APP, "percent:"+percent+", elapsed: "+elapsed+", total: "+totalDuration);
-        mTvElapsedTime.setText(mPlayerUtils.timeToString(elapsed)); // cheating a little bit...
-
-        /////////////////////////////////////////
-//        long elapsedmillisecs = mMusicPlayerService.getEllapsedTime();
-//        String ellapsedsecs = mPlayerUtils.timeToString(elapsedmillisecs);
-//        mTvElapsedTime.setText(ellapsedsecs);
+//        Log.d(LOG_TAG_APP, "percent:"+percent+", elapsed: "+elapsed+", total: "+totalDuration);
+        mTvElapsedTime.setText(mPlayerUtils.timeToString(elapsed));
     }
 
     private void setDuration() {
@@ -173,25 +171,19 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     private void playPauseAction() {
-        if (!mBound) {
+        if (!mServiceBound) {
             Log.d(LOG_TAG_APP, "service not bound!!");
             return;
         }
-        if (mBtnPlayPause.isChecked()) {
-            Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
-            if (trackdata != null) {
-                setTrackDetails(trackdata);
-                mMusicPlayerService.play(mCurrTrack);
-
-            }
-        } else {
-            mMusicPlayerService.pause();
-        }
-
+        if(mBtnPlayPause.isChecked() && ! mMusicPlayerService.isPlaying()) { mMusicPlayerService.play(mCurrTrack); }
+        if(!mBtnPlayPause.isChecked() && mMusicPlayerService.isPlaying()) { mMusicPlayerService.pause(); }
     }
 
     private void prevAction() {
-        if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+        if(!mServiceBound) {
+            Log.d(LOG_TAG_APP, "service not bound!!");
+            return;
+        }
         Bundle trackdata = ((onTrackChangedListener) getActivity()).getPrevTrack();
         if(trackdata != null) {
             setTrackDetails(trackdata);
@@ -204,7 +196,10 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     private void nextAction() {
-        if (!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+        if (!mServiceBound) {
+            Log.d(LOG_TAG_APP, "service not bound!!");
+            return;
+        }
         Bundle trackdata = ((onTrackChangedListener) getActivity()).getNextTrack();
         if (trackdata != null) {
             setTrackDetails(trackdata);
@@ -217,7 +212,7 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     private void stopAction() {
-        if (mBound) {
+        if (mServiceBound) {
             resetElapsedTime();
             mBtnPlayPause.setChecked(false);
             mMusicPlayerService.stop();
@@ -229,8 +224,8 @@ public class PlayerDialogFragment extends DialogFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
-        Log.d(LOG_TAG_APP, "ISLARGSCREEN: "+mIsLargeScreen);
     }
 
     @Override
@@ -309,26 +304,37 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     @Override
+    public void onAttach(Activity host) {
+        super.onAttach(host);
+        if(! mServiceBound) {
+            // bind streamer service to enable playback on track click
+            Log.d(LOG_TAG_APP, "binding player...");
+            mAppctx = (Application) host.getApplicationContext();
+            Intent intent = new Intent(getActivity(), StreamerService.class);
+            mAppctx.bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
-        // bind streamer service to enable playback on track click
-        Log.d(LOG_TAG_APP, "binding player...");
-        Intent intent = new Intent(getActivity(), StreamerService.class);
-        getActivity().bindService(intent, mConnection, getActivity().BIND_AUTO_CREATE);
+
+        Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
+        if (trackdata != null) { setTrackDetails(trackdata); }
     }
 
     @Override
     public void onDestroy() {
         Log.d(LOG_TAG_APP, "destroying player");
         stopElapsedTimer();
+        mAppctx.unbindService(mConnection);
         super.onDestroy();
-        getActivity().unbindService(mConnection);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.d(LOG_TAG_APP, "calling completion cb...");
-        if(!mBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
+        if(!mServiceBound) { Log.d(LOG_TAG_APP, "service not bound!!"); return; }
         mBtnPlayPause.setChecked(false);
         stopElapsedTimer(); // kill timer for previous track
         Bundle trackdata = ((onTrackChangedListener) getActivity()).getNextTrack();
