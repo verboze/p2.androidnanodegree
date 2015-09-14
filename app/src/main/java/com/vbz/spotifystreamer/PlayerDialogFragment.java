@@ -155,7 +155,7 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     private void setDuration() {
-        mDuration =  mMusicPlayerService.getDuration();
+        if (mDuration == 0) { mDuration =  mMusicPlayerService.getDuration(); }
         mTvDuration.setText(mPlayerUtils.timeToString(mDuration));
     }
 
@@ -321,6 +321,7 @@ public class PlayerDialogFragment extends DialogFragment
 
         Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
         if (trackdata != null) { setTrackDetails(trackdata); }
+        if (mMusicPlayerService != null) { setDuration(); }
     }
 
     @Override
