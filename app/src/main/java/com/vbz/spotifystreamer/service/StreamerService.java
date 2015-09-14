@@ -1,14 +1,21 @@
 package com.vbz.spotifystreamer.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.vbz.spotifystreamer.MainActivity;
 import com.vbz.spotifystreamer.PlayerDialogFragment;
+import com.vbz.spotifystreamer.R;
 
 import java.io.IOException;
 
@@ -24,6 +31,8 @@ public class StreamerService extends Service
     private MediaPlayer mMediaPlayer = null;
     private boolean mPaused = false;
     private Handler uiHandler = null;
+    private static final int SVC_NOTIFICATION_ID = 23;
+    private NotificationManager mNotifMgr = null;
 
     /** iBinder interface to access this service */
     public class StreamerBinder extends Binder {
@@ -117,11 +126,29 @@ public class StreamerService extends Service
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnErrorListener(this);
+        mNotifMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // display a persistent notification to user
+        //TODO: implement deeplinking into current exisiting activity/restore state. may need content provider?!?
+        Intent notifIntent = new Intent(this, MainActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, notifIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification notif = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_play_circle_filled_black_48dp)
+                .setContentTitle(getText(R.string.app_name))
+                .setTicker("Music now playing...")
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
+//                .setContentIntent(pi) //TODO: need to implement intent above
+                .build();
+
+        mNotifMgr.notify(SVC_NOTIFICATION_ID, notif);
     }
 
     @Override
     public void onDestroy() {
         Log.d(LOG_TAG, "stopping service...");
+        // remove sticky notification, release mediaplayer resources
+        mNotifMgr.cancel(SVC_NOTIFICATION_ID);
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
