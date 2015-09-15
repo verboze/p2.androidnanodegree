@@ -138,7 +138,7 @@ public class StreamerService extends Service
                 .setTicker("Music now playing...")
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-//                .setContentIntent(pi) //TODO: need to implement intent above
+                .setContentIntent(pi) //TODO: need to implement intent above
                 .build();
 
         mNotifMgr.notify(SVC_NOTIFICATION_ID, notif);
@@ -166,6 +166,7 @@ public class StreamerService extends Service
         mp.start();
         uiHandler.sendEmptyMessage(PlayerDialogFragment.SETDURATION);
         uiHandler.sendEmptyMessage(PlayerDialogFragment.STARTTIMER);
+//        uiHandler.sendEmptyMessage(PlayerDialogFragment.SAVESTATE);
     }
 
     @Override

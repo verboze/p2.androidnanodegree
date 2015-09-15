@@ -94,6 +94,7 @@ public class TrackViewFragment extends ListFragment {
         setRetainInstance(true);
         if (savedinstanceSate == null) { datalist = new ArrayList<>(); }
         mIsLargeScreen = getResources().getBoolean(R.bool.largescreen);
+        if(! mIsLargeScreen) { ((MainActivity)getActivity()).showUpButton(); }
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

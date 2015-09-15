@@ -50,6 +50,7 @@ public class PlayerDialogFragment extends DialogFragment
     public static final int STOPTIMER = 20;
     public static final int RESETELAPSED = 30;
     public static final int SETDURATION = 40;
+    public static final int SAVESTATE = 50;
 
     public Handler mPlaybackUIHandler = new Handler() {
         @Override public void handleMessage(Message msg) {
@@ -59,6 +60,7 @@ public class PlayerDialogFragment extends DialogFragment
                 case STOPTIMER:    stopElapsedTimer(); break;
                 case RESETELAPSED: resetElapsedTime(); break;
                 case SETDURATION:  setDuration(); break;
+                case SAVESTATE:    ((MainActivity)getActivity()).saveState(); break;
                 default: break;
             }
         }
@@ -101,6 +103,7 @@ public class PlayerDialogFragment extends DialogFragment
             Bundle trackdata = ((onTrackChangedListener) getActivity()).getCurrTrack();
             if (trackdata != null) {
                 setTrackDetails(trackdata);
+                Log.d(LOG_TAG_APP, "playback in [onserviceconnected]");
                 mMusicPlayerService.play(mCurrTrack);
                 mBtnPlayPause.setChecked(true);
             }
@@ -175,7 +178,9 @@ public class PlayerDialogFragment extends DialogFragment
             Log.d(LOG_TAG_APP, "service not bound!!");
             return;
         }
-        if(mBtnPlayPause.isChecked() && ! mMusicPlayerService.isPlaying()) { mMusicPlayerService.play(mCurrTrack); }
+        if(mBtnPlayPause.isChecked() && ! mMusicPlayerService.isPlaying()) {
+            Log.d(LOG_TAG_APP, "playback in [playpauseaction]");
+            mMusicPlayerService.play(mCurrTrack); }
         if(!mBtnPlayPause.isChecked() && mMusicPlayerService.isPlaying()) { mMusicPlayerService.pause(); }
     }
 
@@ -189,6 +194,7 @@ public class PlayerDialogFragment extends DialogFragment
             setTrackDetails(trackdata);
             resetElapsedTime();
             mMusicPlayerService.stop();
+            Log.d(LOG_TAG_APP, "playback in [prevaction]");
             mMusicPlayerService.play(mCurrTrack);
             mBtnPlayPause.setChecked(true);
         }
@@ -205,6 +211,7 @@ public class PlayerDialogFragment extends DialogFragment
             setTrackDetails(trackdata);
             resetElapsedTime();
             mMusicPlayerService.stop();
+            Log.d(LOG_TAG_APP, "playback in [nextaction]");
             mMusicPlayerService.play(mCurrTrack);
             mBtnPlayPause.setChecked(true);
         }
@@ -298,6 +305,8 @@ public class PlayerDialogFragment extends DialogFragment
             Window win = popupPlayer.getWindow();
             WindowManager.LayoutParams wlp = win.getAttributes();
             wlp.gravity = Gravity.BOTTOM;
+        } else {
+            ((MainActivity)getActivity()).showUpButton();
         }
 
         return playerView;
@@ -325,6 +334,17 @@ public class PlayerDialogFragment extends DialogFragment
     }
 
     @Override
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance()) {
+            // there's a bug in support library that prevents dialogFragment from
+            // respecting setRetainInstance(true) of the fragment. This snippet fixes that
+            // http://stackoverflow.com/questions/14657490/how-to-properly-retain-a-dialogfragment-through-rotation
+            getDialog().setDismissMessage(null);
+        }
+        super.onDestroyView();
+    }
+
+    @Override
     public void onDestroy() {
         Log.d(LOG_TAG_APP, "destroying player");
         stopElapsedTimer();
@@ -341,6 +361,7 @@ public class PlayerDialogFragment extends DialogFragment
         Bundle trackdata = ((onTrackChangedListener) getActivity()).getNextTrack();
         if(trackdata != null) {
             setTrackDetails(trackdata);
+            Log.d(LOG_TAG_APP, "playback in [oncompletion]");
             mMusicPlayerService.play(mCurrTrack);
             mBtnPlayPause.setChecked(true);
         }

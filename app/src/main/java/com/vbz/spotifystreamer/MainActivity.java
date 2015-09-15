@@ -1,10 +1,14 @@
 package com.vbz.spotifystreamer;
 
+import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
@@ -29,25 +33,6 @@ public class MainActivity extends AppCompatActivity
                     .commit();
         }
 
-        /*
-        if(tvf != null && tvf.isInLayout()) {
-            if (findViewById(R.id.tracks_list_container) == null) {
-                // when rotating from landscape to portrait orientation
-                fm.beginTransaction()
-                        .replace(R.id.main_list_container, tvf, TrackViewFragment.FRAGMENT_NAME)
-                        .addToBackStack(TrackViewFragment.FRAGMENT_NAME)
-                        .commit();
-            }
-            else {
-                // when rotating from portrait to landscape orientation
-//                fm.beginTransaction()
-//                        .replace(R.id.main_list_container, tvf, TrackViewFragment.FRAGMENT_NAME)
-//                        .addToBackStack(TrackViewFragment.FRAGMENT_NAME)
-//                        .commit();
-            }
-        }
-        */
-
         if(findViewById(R.id.tracks_list_container) != null) {
             Log.d(LOG_TAG_APP, "instantiating track list frag");
             mTwoPanes = true;
@@ -60,13 +45,15 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    @Override public void onItemSelected(Bundle data) {
+    @Override
+    public void onItemSelected(Bundle data) {
         // handle list item click, dispatch track detail to either
         // a new activity or to an adjacent fragment
         // TODO: IMPORTANT! fix 'rotate from landscape to normal' crashes app No view found for id 0x7f0c0051
@@ -85,6 +72,22 @@ public class MainActivity extends AppCompatActivity
                     .addToBackStack(TrackViewFragment.FRAGMENT_NAME)
                     .commit();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                getSupportFragmentManager().popBackStack();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void saveTrackData() {
@@ -144,6 +147,20 @@ public class MainActivity extends AppCompatActivity
             Log.d(LOG_TAG_APP, "could not retrieve fragment: " + TrackViewFragment.FRAGMENT_NAME);
             return null;
         }
+    }
+
+    public void saveState() {
+        // TODO: I want to save the current state of the player. maybe better handled in onSaveInstance?
+    }
+
+    public void showUpButton() {
+        try { getSupportActionBar().setDisplayHomeAsUpEnabled(true); }
+        catch(NullPointerException npe) { Log.e(LOG_TAG_APP, "umm, why?\n" + npe.toString()); }
+    }
+
+    public void hideUpButton() {
+        try { getSupportActionBar().setDisplayHomeAsUpEnabled(false); }
+        catch(NullPointerException npe) { Log.e(LOG_TAG_APP, "umm, why?\n" + npe.toString()); }
     }
 }
 

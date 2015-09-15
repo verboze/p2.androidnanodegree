@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -28,7 +29,8 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class ArtistViewFragment extends ListFragment {
+public class ArtistViewFragment extends ListFragment
+       implements FragmentManager.OnBackStackChangedListener {
     private static final String LOG_TAG_APP = "SPOTSTREAMER";
     private static final String LOG_TAG_API = "SPOTAPI";
     public static final String FRAGMENT_NAME = "ARTISTLIST";
@@ -75,7 +77,8 @@ public class ArtistViewFragment extends ListFragment {
         ((MainActivity)getActivity()).clearTrackList();
     }
 
-    @Override public void onCreate(Bundle savedinstanceSate) {
+    @Override
+    public void onCreate(Bundle savedinstanceSate) {
         super.onCreate(savedinstanceSate);
         setHasOptionsMenu(true);
         setRetainInstance(true);
@@ -85,15 +88,18 @@ public class ArtistViewFragment extends ListFragment {
         } else {
             mDatalist = new ArrayList<Artist>();
         }
+        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         // set array adapter with empty data
         return inflater.inflate(R.layout.fragment_artists, container, false);
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // add a search icon to action bar
         inflater.inflate(R.menu.menu_mainfragment, menu);
         final MenuItem searchButton = menu.findItem(R.id.search);
@@ -124,11 +130,13 @@ public class ArtistViewFragment extends ListFragment {
         searchButton.setActionView(sv);
     }
 
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
     }
 
-    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
         Artist item = mDatalist.get(position);
 
         Bundle data = new Bundle();
@@ -138,10 +146,18 @@ public class ArtistViewFragment extends ListFragment {
         clickAction.onItemSelected(data);
     }
 
-    @Override public void onSaveInstanceState(Bundle savedInstanceState) {
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    public void onBackStackChanged() {
+        //Enable Up button only  if there are entries in the back stack
+        if(getActivity().getSupportFragmentManager().getBackStackEntryCount() < 1) {
+            try { ((MainActivity)getActivity()).hideUpButton(); }
+            catch(NullPointerException npe) { Log.e(LOG_TAG_APP, "uh oh...\n" + npe.toString()); }
+        }
+    }
     public interface SelectionCallback {
         public void onItemSelected(Bundle data);
     }
